@@ -1,0 +1,9 @@
+*.so
+*.a
+*.pyc
+*.dylib
+*.o
+*.out
+tmp/
+_bazel/
+build/
