@@ -1,6 +1,5 @@
 # pypebble
 
----
 A work-in-progress Python wrapper for CockroachDB's [Pebble](https://github.com/cockroachdb/pebble) 
 storage engine, using a cgo and C++/Boost.Python-based interface.
 
@@ -9,19 +8,19 @@ storage engine, using a cgo and C++/Boost.Python-based interface.
 ```shell
 $ go build -buildmode=c-shared -o libpebble.so ./pkg/bindings
 $ mkdir build && cd build
-$ cmake -DPYTHON_LIBRARY=<path/to/latest/libpython3.XX.dylib> ..
-$ make pebble_ext
+$ cmake ..
+$ make pypebble
 ```
 Or, for just C++ bindings and sample program:
 ```shell
-$ clang++ -Wall --std=c++17 -o pebtest.out -fPIC pebblepp/main.cpp pebblepp/pebble.cpp -I. -L. -lpebble
+$ clang++ -Wall --std=c++17 -o pebtest.out -fPIC pebblepp/main.cpp pebblepp/pebble.cpp pebblepp/options.cpp -I. -L. -lpebble
 ```
 
 ## Python Usage
-(Make sure all `.so` files are on the correct path)
+(Make sure all `.so` files are on the PATH)
 ```python
->>> import pebble_ext
->>> db = pebble_ext.DB("tmp")
+>>> import pypebble
+>>> db = pypebble.Open("tmp")
 >>> db.Set("name", "pebble!", True)
 >>> db.Get("name")
 'pebble!'
