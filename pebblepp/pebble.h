@@ -3,22 +3,33 @@
 #include <cstdint>
 #include <string>
 
+#include "pebblepp/options.h"
+
 namespace cockroachdb {
 namespace pebble {
 
+int CGoHandles();
+
 class DB {
  public:
-  DB(std::string name);
   static DB* Open(const std::string& name);
+  static DB* Open(const std::string& name, const Options* options);
+
   int64_t NumFiles();
   void Close();
 
-  void Set(const std::string& key, const std::string& val, bool sync);
-  std::string Get(const std::string& key);
-
   // No copying
-//  DB(const DB&) = delete;
-//  void operator=(const DB&) = delete;
+  DB(const DB&) = delete;
+  void operator=(const DB&) = delete;
+
+  virtual ~DB();
+
+  std::string Get(const std::string& key);
+  void Set(const std::string& key, const std::string& val, bool sync = true);
+  void Delete(const std::string& key, bool sync = true);
+  void SingleDelete(const std::string& key, bool sync = true);
+  void DeleteRange(const std::string& start_key, const std::string& end_key, bool sync = true);
+  void Merge(const std::string& key, const std::string& val, bool sync = true);
 
  private:
   uintptr_t handle_;
