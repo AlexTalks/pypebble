@@ -39,5 +39,5 @@ class DB {
   void checkValid();
 };
 
-} // namespace pebble
-} // namespace cockroachdb
+}  // namespace pebble
+}  // namespace cockroachdb

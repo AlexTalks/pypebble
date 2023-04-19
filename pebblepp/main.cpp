@@ -1,7 +1,7 @@
-#include "pebble.h"
-
 #include <format>
 #include <iostream>
+
+#include "pebble.h"
 
 int main() {
   const std::string dbName = "tmp";
@@ -10,12 +10,12 @@ int main() {
     cockroachdb::pebble::DB* db = cockroachdb::pebble::DB::Open(dbName);
     std::cout << "Opened " << dbName << std::endl;
 
-
     db->Set("hello", "world", true);
     db->Set("name", "alex", true);
 
     std::string val = db->Get("hello");
-    std::cout << "Got val=" << val << " for key=" << "hello" << std::endl;
+    std::cout << "Got val=" << val << " for key="
+              << "hello" << std::endl;
 
     int64_t numFiles = db->NumFiles();
     std::cout << "DB Num Files: " << numFiles << std::endl;

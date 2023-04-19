@@ -1,0 +1,6 @@
+# Use the Google style in this project.
+BasedOnStyle: Google
+
+ColumnLimit: 100
+DerivePointerAlignment: false
+PointerAlignment: Left
