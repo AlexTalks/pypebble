@@ -61,9 +61,11 @@ func PebbleGet(
 	return valBytes, valLen, nil
 }
 
-// TODO(sarkesian): Support iterators, inc. IterOptions (default/Cockroach)
 // TODO(sarkesian): Support EngineKey encoding/decoding
-// TODO(sarkesian): Support
+// TODO(sarkesian): Support Reader interface:
+// 	i.e. iterators, inc. IterOptions (default/Cockroach)
+// TODO(sarkesian): Support Writer interface:
+// 	i.e. Apply(batch), LogData, RangeKeySet/Unset, RangeKeyDelete
 
 //export PebbleSet
 func PebbleSet(

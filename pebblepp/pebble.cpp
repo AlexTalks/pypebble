@@ -18,7 +18,7 @@ DB::~DB() {
 }
 
 DB* DB::Open(const std::string& name) {
-  Options basicOptions(PebbleBasicOptions());
+  Options basicOptions(PebbleBasicOptions(true));
   return DB::Open(name, &basicOptions);
 }
 

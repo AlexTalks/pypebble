@@ -15,8 +15,10 @@ import (
 import "C"
 
 //export PebbleBasicOptions
-func PebbleBasicOptions() C.uintptr_t {
-	opts := &pebble.Options{}
+func PebbleBasicOptions(readWrite bool) C.uintptr_t {
+	opts := &pebble.Options{
+		ReadOnly: !readWrite,
+	}
 	return C.uintptr_t(NewCGoHandle(opts).Handle)
 }
 

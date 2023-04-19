@@ -6,7 +6,7 @@ using namespace boost::python;
 namespace cockroachdb {
 namespace pebble {
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(options_overloads, CockroachDefaultOptions, 0, 1)
+BOOST_PYTHON_FUNCTION_OVERLOADS(options_overloads, BasicOptions, 0, 1)
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(set_overloads, Set, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(delete_overloads, Delete, 1, 2)
@@ -18,7 +18,10 @@ BOOST_PYTHON_MODULE(pypebble)
 {
   class_<Options, boost::noncopyable>("Options", no_init);
   def("BasicOptions", &BasicOptions,
-      return_value_policy<manage_new_object>());
+      options_overloads(
+          args("read_write"), "basic pebble options"
+          )[return_value_policy<manage_new_object>()]
+      );
   def("CockroachDefaultOptions", &CockroachDefaultOptions,
       options_overloads(
           args("read_write"), "cockroach default options"
@@ -29,9 +32,9 @@ BOOST_PYTHON_MODULE(pypebble)
       args(
           "read_write",
           "use_cockroach_interfaces",
-          "l_0_compaction_threshold",
+          "l0_compaction_threshold",
           "l0_stop_writes_threshold",
-          "l_base_max_bytes",
+          "lbase_max_bytes",
           "levels",
           "max_concurrent_compactions",
           "mem_table_size",

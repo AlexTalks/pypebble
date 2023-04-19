@@ -21,14 +21,14 @@ class CGoHandle {
 
 typedef CGoHandle Options;
 
-Options* BasicOptions();
+Options* BasicOptions(bool read_write = false);
 Options* CockroachDefaultOptions(bool read_write = false);
 Options* PebbleOptions(
     bool read_write,
     bool use_cockroach_interfaces,
-    int l_0_compaction_threshold,
+    int l0_compaction_threshold,
     int l0_stop_writes_threshold,
-    int64_t l_base_max_bytes,
+    int64_t lbase_max_bytes,
     int levels,
     int max_concurrent_compactions,
     int mem_table_size,

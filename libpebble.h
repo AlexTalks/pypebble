@@ -116,7 +116,7 @@ extern cchar_t* PebbleSingleDelete(uintptr_t dbPtr, void* keyBytes, int keyLen, 
 extern cchar_t* PebbleDeleteRange(uintptr_t dbPtr, void* startKeyBytes, int startKeyLen, void* endKeyBytes, int endKeyLen, GoUint8 sync);
 extern cchar_t* PebbleMerge(uintptr_t dbPtr, void* keyBytes, int keyLen, void* valBytes, int valLen, GoUint8 sync);
 extern GoInt64 PebbleNumFiles(uintptr_t dbPtr);
-extern uintptr_t PebbleBasicOptions();
+extern uintptr_t PebbleBasicOptions(GoUint8 readWrite);
 extern uintptr_t PebbleCockroachDefaultOptions(GoUint8 readWrite);
 extern uintptr_t PebbleOptions(GoUint8 readWrite, GoUint8 useCockroachInterfaces, GoInt l0CompactionThreshold, GoInt l0StopWritesThreshold, GoInt64 lBaseMaxBytes, GoInt levels, GoInt maxConcurrentCompactions, GoInt memTableSize, GoInt memTableStopWritesThreshold, GoInt blockSize, GoInt indexBlockSize);
 

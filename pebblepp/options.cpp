@@ -13,8 +13,8 @@ CGoHandle::~CGoHandle() {
 CGoHandle::CGoHandle(uintptr_t new_handle)
 : handle_(new_handle) {}
 
-Options* BasicOptions() {
-  return new Options(PebbleBasicOptions());
+Options* BasicOptions(bool read_write) {
+  return new Options(PebbleBasicOptions(read_write));
 }
 
 Options* CockroachDefaultOptions(bool read_write) {
@@ -26,7 +26,7 @@ Options* PebbleOptions(
     bool use_cockroach_interfaces,
     int l0_compaction_threshold,
     int l0_stop_writes_threshold,
-    int64_t l_base_max_bytes,
+    int64_t lbase_max_bytes,
     int levels,
     int max_concurrent_compactions,
     int mem_table_size,
@@ -38,7 +38,7 @@ Options* PebbleOptions(
       use_cockroach_interfaces,
       l0_compaction_threshold,
       l0_stop_writes_threshold,
-      l_base_max_bytes,
+      lbase_max_bytes,
       levels,
       max_concurrent_compactions,
       mem_table_size,
