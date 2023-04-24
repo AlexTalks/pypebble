@@ -7,10 +7,14 @@ using namespace boost::python;
 namespace cockroachdb {
 namespace pebble {
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(options_overloads, BasicOptions, 0, 1)
+BOOST_PYTHON_FUNCTION_OVERLOADS(basic_options_overloads, BasicOptions, 0, 1)
+BOOST_PYTHON_FUNCTION_OVERLOADS(cockroach_options_overloads, CockroachDefaultOptions, 0, 1)
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(set_overloads, Set, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(delete_overloads, Delete, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(single_delete_overloads, SingleDelete, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(delete_range_overloads, DeleteRange, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(merge_overloads, Merge, 2, 3)
 
 DB* (*open1)(const std::string&) = &DB::Open;
 DB* (*open2)(const std::string&, const Options*) = &DB::Open;
@@ -18,10 +22,10 @@ DB* (*open2)(const std::string&, const Options*) = &DB::Open;
 BOOST_PYTHON_MODULE(pypebble) {
   class_<Options, boost::noncopyable>("Options", no_init);
   def("BasicOptions", &BasicOptions,
-      options_overloads(args("read_write"),
+      basic_options_overloads(args("read_write"),
                         "basic pebble options")[return_value_policy<manage_new_object>()]);
   def("CockroachDefaultOptions", &CockroachDefaultOptions,
-      options_overloads(args("read_write"),
+      cockroach_options_overloads(args("read_write"),
                         "cockroach default options")[return_value_policy<manage_new_object>()]);
   // TODO(sarkesian): Convert the below arguments to kwargs.
   def("PebbleOptions", &PebbleOptions,
@@ -37,11 +41,11 @@ BOOST_PYTHON_MODULE(pypebble) {
       .def("Set", &DB::Set, set_overloads(args("key", "val", "sync"), "sets a key to a value"))
       .def("Delete", &DB::Delete, delete_overloads(args("key", "sync"), "deletes a key"))
       .def("SingleDelete", &DB::SingleDelete,
-           delete_overloads(args("key", "sync"), "deletes a key"))
+           single_delete_overloads(args("key", "sync"), "single deletes a key"))
       .def("DeleteRange", &DB::DeleteRange,
-           set_overloads(args("start_key", "end_key", "sync"), "delete a range of keys"))
+           delete_range_overloads(args("start_key", "end_key", "sync"), "delete a range of keys"))
       .def("Merge", &DB::Merge,
-           set_overloads(args("key", "val", "sync"), "merge a value into a key"));
+           merge_overloads(args("key", "val", "sync"), "merge a value into a key"));
 
   def("Open", open1, args("path"), return_value_policy<manage_new_object>(),
       "opens a new pebble.DB");
