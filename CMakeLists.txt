@@ -13,6 +13,8 @@ set(CMAKE_SHARED_MODULE_PREFIX "")
 # Add a shared module - modules are intended to be imported at runtime.
 # - This is where you add the source files
 add_library(pypebble MODULE
+        pebblepp/common.cpp
+        pebblepp/iterator.cpp
         pebblepp/options.cpp
         pebblepp/pebble.cpp
         pebblepp/pypebble.cpp)
@@ -27,6 +29,8 @@ target_include_directories(pypebble PRIVATE
         ${Python_INCLUDE_DIRS})
 
 add_executable(pebtest.out
+        pebblepp/common.cpp
+        pebblepp/iterator.cpp
         pebblepp/options.cpp
         pebblepp/pebble.cpp
         pebblepp/main.cpp)

@@ -1,23 +1,9 @@
 #pragma once
 
-#include <cstdint>
+#include "pebblepp/common.h"
 
 namespace cockroachdb {
 namespace pebble {
-
-class CGoHandle {
- public:
-  CGoHandle(uintptr_t new_handle);
-  CGoHandle(const CGoHandle&) = delete;
-  void operator=(const CGoHandle&) = delete;
-
-  virtual ~CGoHandle();
-
-  friend class DB;
-
- private:
-  uintptr_t handle_;
-};
 
 typedef CGoHandle Options;
 

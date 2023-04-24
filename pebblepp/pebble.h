@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 
+#include "pebblepp/iterator.h"
 #include "pebblepp/options.h"
 
 namespace cockroachdb {
@@ -10,6 +11,9 @@ namespace pebble {
 
 int CGoHandles();
 
+std::string PrettyPrintKey(const std::string& key);
+
+// TODO(sarkesian): inherit from CGoHandle
 class DB {
  public:
   static DB* Open(const std::string& name);
@@ -30,6 +34,8 @@ class DB {
   void SingleDelete(const std::string& key, bool sync = true);
   void DeleteRange(const std::string& start_key, const std::string& end_key, bool sync = true);
   void Merge(const std::string& key, const std::string& val, bool sync = true);
+
+  Iterator* NewIter(IterOptions& opts);
 
  private:
   uintptr_t handle_;

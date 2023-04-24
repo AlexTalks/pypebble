@@ -7,19 +7,12 @@ import (
 )
 
 /*
-#include <stdint.h> // for uintptr_t
-
-typedef const char cchar_t;
-
-typedef struct {
-	uintptr_t handle;
-	const char* errMsg;
-} PebbleOpenResult;
+#include "libpebble-common.h"
 */
 import "C"
 
 //export PebbleOpen
-func PebbleOpen(name *C.cchar_t, optsPtr C.uintptr_t) C.PebbleOpenResult {
+func PebbleOpen(name *C.cchar_t, optsPtr C.uintptr_t) C.handle_and_error_t {
 	opts := CGoHandle(optsPtr).Value().(*pebble.Options)
 	if !opts.ReadOnly {
 		pebble.DefaultLogger.Infof("WARNING: opening database in read-write mode. " +
@@ -27,9 +20,9 @@ func PebbleOpen(name *C.cchar_t, optsPtr C.uintptr_t) C.PebbleOpenResult {
 	}
 	db, err := pebble.Open(C.GoString(name), opts)
 	if err != nil {
-		return C.PebbleOpenResult{errMsg: C.CString(err.Error())}
+		return C.handle_and_error_t{errMsg: C.CString(err.Error())}
 	}
-	return C.PebbleOpenResult{handle: C.uintptr_t(NewCGoHandle(db).Handle)}
+	return C.handle_and_error_t{handle: C.uintptr_t(NewCGoHandle(db).Handle)}
 }
 
 //export PebbleClose
@@ -45,20 +38,17 @@ func PebbleClose(dbPtr C.uintptr_t) *C.cchar_t {
 }
 
 //export PebbleGet
-func PebbleGet(
-	dbPtr C.uintptr_t,
-	keyBytes unsafe.Pointer, keyLen C.int,
-) (unsafe.Pointer, int, *C.cchar_t) {
+func PebbleGet(dbPtr C.uintptr_t, keyBytes unsafe.Pointer, keyLen C.int) C.bytes_and_error_t {
 	db := CGoHandle(dbPtr).Value().(*pebble.DB)
 	key := C.GoBytes(keyBytes, keyLen)
 	val, closer, err := db.Get(key)
 	if err != nil {
-		return nil, 0, C.CString(err.Error())
+		return C.bytes_and_error_t{val: nil, len: 0, errMsg: C.CString(err.Error())}
 	}
-	valLen := len(val)
+	valLen := C.int64_t(len(val))
 	valBytes := C.CBytes(val)
 	defer closer.Close()
-	return valBytes, valLen, nil
+	return C.bytes_and_error_t{val: valBytes, len: valLen, errMsg: nil}
 }
 
 // TODO(sarkesian): Support EngineKey encoding/decoding
@@ -70,8 +60,10 @@ func PebbleGet(
 //export PebbleSet
 func PebbleSet(
 	dbPtr C.uintptr_t,
-	keyBytes unsafe.Pointer, keyLen C.int,
-	valBytes unsafe.Pointer, valLen C.int,
+	keyBytes unsafe.Pointer,
+	keyLen C.int,
+	valBytes unsafe.Pointer,
+	valLen C.int,
 	sync bool,
 ) *C.cchar_t {
 	db := CGoHandle(dbPtr).Value().(*pebble.DB)
@@ -91,11 +83,7 @@ func PebbleSet(
 }
 
 //export PebbleDelete
-func PebbleDelete(
-	dbPtr C.uintptr_t,
-	keyBytes unsafe.Pointer, keyLen C.int,
-	sync bool,
-) *C.cchar_t {
+func PebbleDelete(dbPtr C.uintptr_t, keyBytes unsafe.Pointer, keyLen C.int, sync bool) *C.cchar_t {
 	db := CGoHandle(dbPtr).Value().(*pebble.DB)
 	key := C.GoBytes(keyBytes, keyLen)
 	var opts *pebble.WriteOptions
@@ -113,9 +101,7 @@ func PebbleDelete(
 
 //export PebbleSingleDelete
 func PebbleSingleDelete(
-	dbPtr C.uintptr_t,
-	keyBytes unsafe.Pointer, keyLen C.int,
-	sync bool,
+	dbPtr C.uintptr_t, keyBytes unsafe.Pointer, keyLen C.int, sync bool,
 ) *C.cchar_t {
 	db := CGoHandle(dbPtr).Value().(*pebble.DB)
 	key := C.GoBytes(keyBytes, keyLen)
@@ -135,8 +121,10 @@ func PebbleSingleDelete(
 //export PebbleDeleteRange
 func PebbleDeleteRange(
 	dbPtr C.uintptr_t,
-	startKeyBytes unsafe.Pointer, startKeyLen C.int,
-	endKeyBytes unsafe.Pointer, endKeyLen C.int,
+	startKeyBytes unsafe.Pointer,
+	startKeyLen C.int,
+	endKeyBytes unsafe.Pointer,
+	endKeyLen C.int,
 	sync bool,
 ) *C.cchar_t {
 	db := CGoHandle(dbPtr).Value().(*pebble.DB)
@@ -158,8 +146,10 @@ func PebbleDeleteRange(
 //export PebbleMerge
 func PebbleMerge(
 	dbPtr C.uintptr_t,
-	keyBytes unsafe.Pointer, keyLen C.int,
-	valBytes unsafe.Pointer, valLen C.int,
+	keyBytes unsafe.Pointer,
+	keyLen C.int,
+	valBytes unsafe.Pointer,
+	valLen C.int,
 	sync bool,
 ) *C.cchar_t {
 	db := CGoHandle(dbPtr).Value().(*pebble.DB)
@@ -176,6 +166,14 @@ func PebbleMerge(
 		return C.CString(err.Error())
 	}
 	return nil
+}
+
+//export PebbleNewIter
+func PebbleNewIter(dbPtr C.uintptr_t, iterOptionsPtr C.uintptr_t) C.uintptr_t {
+	db := CGoHandle(dbPtr).Value().(*pebble.DB)
+	iterOptions := CGoHandle(iterOptionsPtr).Value().(*pebble.IterOptions)
+	iter := db.NewIter(iterOptions)
+	return C.uintptr_t(NewCGoHandle(iter).Handle)
 }
 
 //export PebbleNumFiles

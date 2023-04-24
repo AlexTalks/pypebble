@@ -5,14 +5,6 @@
 namespace cockroachdb {
 namespace pebble {
 
-CGoHandle::~CGoHandle() {
-  if (handle_) {
-    ReleaseHandle(handle_);
-  }
-}
-
-CGoHandle::CGoHandle(uintptr_t new_handle) : handle_(new_handle) {}
-
 Options* BasicOptions(bool read_write) { return new Options(PebbleBasicOptions(read_write)); }
 
 Options* CockroachDefaultOptions(bool read_write) {

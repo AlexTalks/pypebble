@@ -1,6 +1,7 @@
 # TODO
 
 Functions and functionality to be implemented.
+LOC thus far: 1320.
 
 ## `pebble.DB` Functions
 
@@ -12,9 +13,8 @@ func (d *DB) RangeKeyDelete(start, end []byte, opts *WriteOptions) error
 func (d *DB) Apply(batch *Batch, opts *WriteOptions) error
 func (d *DB) NewBatch() *Batch
 func (d *DB) NewIndexedBatch() *Batch
-func (d *DB) NewIter(o *IterOptions) *Iterator
+//func (d *DB) NewIter(o *IterOptions) *Iterator    // Done
 func (d *DB) NewSnapshot() *Snapshot
-func (d *DB) Close() error
 func (d *DB) Compact(start, end []byte, parallelize bool) error
 func (d *DB) Flush() error
 func (d *DB) Metrics() *Metrics
@@ -96,35 +96,10 @@ func (b *Batch) NewIterWithContext(ctx context.Context, o *IterOptions) *Iterato
 ## `pebble.Iterator` Functions
 
 ```go
-func (i *Iterator) SeekGE(key []byte) bool
-func (i *Iterator) SeekGEWithLimit(key []byte, limit []byte) IterValidityState
-func (i *Iterator) SeekPrefixGE(key []byte) bool
-func (i *Iterator) SeekLT(key []byte) bool
-func (i *Iterator) SeekLTWithLimit(key []byte, limit []byte) IterValidityState
-func (i *Iterator) First() bool
-func (i *Iterator) Last() bool
-func (i *Iterator) Next() bool
-func (i *Iterator) NextWithLimit(limit []byte) IterValidityState
-func (i *Iterator) NextPrefix() bool
-func (i *Iterator) Prev() bool
-func (i *Iterator) PrevWithLimit(limit []byte) IterValidityState
-func (i *Iterator) RangeKeyChanged() bool
-func (i *Iterator) HasPointAndRange() (hasPoint, hasRange bool)
-func (i *Iterator) RangeBounds() (start, end []byte)
-func (i *Iterator) Key() []byte
-func (i *Iterator) Value() []byte
-func (i *Iterator) ValueAndErr() ([]byte, error)
-func (i *Iterator) LazyValue() LazyValue
-func (i *Iterator) RangeKeys() []RangeKeyData
-func (i *Iterator) Valid() bool
-func (i *Iterator) Error() error
-func (i *Iterator) Close() error
-func (i *Iterator) SetBounds(lower, upper []byte)
-func (i *Iterator) SetOptions(o *IterOptions)
-func (i *Iterator) Metrics() IteratorMetrics
-func (i *Iterator) ResetStats()
-func (i *Iterator) Stats() IteratorStats
-func (i *Iterator) Clone(opts CloneOptions) (*Iterator, error)
+
+func (i *Iterator) RangeKeys() []RangeKeyData   // needed?
+func (i *Iterator) Metrics() IteratorMetrics    // changed to IterReadAmp()
+func (i *Iterator) Stats() IteratorStats        // not yet implemented
 ```
 
 ### Unneeded
@@ -134,17 +109,12 @@ func (i *Iterator) CloneWithContext(ctx context.Context, opts CloneOptions) (*It
 
 ## Other Structs/Options/Configs/Enums
 * `BatchReader` - might be simple, just exposes a `Next(..)` function.
-* `IterOptions` - large, unwieldy, likely needed
 * `Snapshot` - seems simple, but has references that need to be explicitly surfaced
 * `Metrics` - large, unwieldy 
 * `SSTableInfo` - is this needed?  probably not 
-* `BatchCommitStats` - probably not needed immediately, somewhat simple to expose 
-* `IterValidityState` - simple enum 
-* `LazyValue` - complex, not immediately needed 
-* `RangeKeyData` - simple struct 
-* `IteratorMetrics` - very simple struct, just contains an int for ReadAmp 
-* `IteratorStats` - relatively simple struct 
-* `CloneOptions` - should be simple but references IterOptions, unclear if needed at first
+* `BatchCommitStats` - probably not needed immediately, somewhat simple to expose
+* `RangeKeyData` - simple struct
+* `IteratorStats` - relatively simple struct
 
 ## Core Interfaces
 

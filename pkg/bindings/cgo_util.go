@@ -1,11 +1,9 @@
 package main
 
-import (
-	"runtime/cgo"
-)
+import "runtime/cgo"
 
 /*
-#include <stdint.h> // for uintptr_t
+#include "libpebble-common.h"
 */
 import "C"
 

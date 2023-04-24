@@ -8,3 +8,5 @@ tmp/
 _bazel/
 build/
 cmake-build-debug/
+.vscode/
+sample/
