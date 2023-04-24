@@ -66,7 +66,7 @@ std::string DB::Get(const std::string& key) {
     throw std::runtime_error(getResult.errMsg);
   }
 
-  return std::string((char*)getResult.val, getResult.len);
+  return std::string((char*)getResult.bytes.val, getResult.bytes.len);
 }
 
 void DB::Set(const std::string& key, const std::string& val, bool sync) {

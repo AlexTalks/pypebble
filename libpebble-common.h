@@ -17,8 +17,7 @@ typedef struct {
 } bytes_t;
 
 typedef struct {
-	void* val;
-	int64_t len;
+	bytes_t bytes;
 	const char* errMsg;
 } bytes_and_error_t;
 
