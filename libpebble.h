@@ -19,7 +19,7 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 /* Start of preamble from import "C" comments.  */
 
 
-#line 7 "cgo_util.go"
+#line 5 "cgo_util.go"
 
 #include "libpebble-common.h"
 
