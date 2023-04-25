@@ -2,8 +2,7 @@
 
 #include "pebblepp/common.h"
 
-namespace cockroachdb {
-namespace pebble {
+namespace cockroachdb::pebble {
 
 typedef CGoHandle Options;
 
@@ -14,5 +13,4 @@ Options* PebbleOptions(bool read_write, bool use_cockroach_interfaces, int l0_co
                        int max_concurrent_compactions, int mem_table_size,
                        int mem_table_stop_writes_threshold, int block_size, int index_block_size);
 
-}  // namespace pebble
-}  // namespace cockroachdb
+}  // namespace cockroachdb::pebble

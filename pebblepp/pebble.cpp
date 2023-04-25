@@ -2,22 +2,24 @@
 
 #include "libpebble.h"
 
-namespace cockroachdb {
-namespace pebble {
+namespace cockroachdb::pebble {
 
 int CGoHandles() { return LiveCGoHandles(); }
 
 std::string PrettyPrintKey(const std::string& key) {
-  return std::string(PrettyKey((void*)key.data(), key.length()));
+  return ::PrettyPrintKey((char*)key.data(), key.length());
 }
 
-DB::DB(uintptr_t new_handle) : handle_(new_handle), closed_(false) {}
-
-DB::~DB() {
-  if (handle_) {
-    ReleaseHandle(handle_);
+std::string PrettyScanKey(const std::string& human_key) {
+  bytes_and_error_t result = ::PrettyScanKey(human_key.c_str());
+  if (result.err_msg) {
+    throw std::runtime_error(result.err_msg);
   }
+  return std::string((char*)result.bytes.val, result.bytes.len);
 }
+
+DB::DB(uintptr_t new_handle) : CGoHandle(new_handle), closed_(false) {}
+DB::~DB() {}
 
 DB* DB::Open(const std::string& name) {
   Options basicOptions(PebbleBasicOptions(true));
@@ -26,8 +28,8 @@ DB* DB::Open(const std::string& name) {
 
 DB* DB::Open(const std::string& name, const Options* options) {
   handle_and_error_t result = PebbleOpen(name.c_str(), options->handle_);
-  if (result.errMsg) {
-    throw std::runtime_error(result.errMsg);
+  if (result.err_msg) {
+    throw std::runtime_error(result.err_msg);
   }
 
   return new DB(result.handle);
@@ -62,8 +64,8 @@ void DB::Close() {
 std::string DB::Get(const std::string& key) {
   checkValid();
   bytes_and_error_t getResult = PebbleGet(handle_, (void*)key.data(), key.length());
-  if (getResult.errMsg) {
-    throw std::runtime_error(getResult.errMsg);
+  if (getResult.err_msg) {
+    throw std::runtime_error(getResult.err_msg);
   }
 
   return std::string((char*)getResult.bytes.val, getResult.bytes.len);
@@ -117,5 +119,4 @@ Iterator* DB::NewIter(IterOptions& opts) {
   return new Iterator(PebbleNewIter(handle_, opts.handle_));
 }
 
-}  // namespace pebble
-}  // namespace cockroachdb
+}  // namespace cockroachdb::pebble

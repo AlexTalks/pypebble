@@ -3,18 +3,18 @@
 #include <cstdint>
 #include <string>
 
+#include "pebblepp/common.h"
 #include "pebblepp/iterator.h"
 #include "pebblepp/options.h"
 
-namespace cockroachdb {
-namespace pebble {
+namespace cockroachdb::pebble {
 
 int CGoHandles();
 
 std::string PrettyPrintKey(const std::string& key);
+std::string PrettyScanKey(const std::string& human_key);
 
-// TODO(sarkesian): inherit from CGoHandle
-class DB {
+class DB : public CGoHandle {
  public:
   static DB* Open(const std::string& name);
   static DB* Open(const std::string& name, const Options* options);
@@ -38,12 +38,10 @@ class DB {
   Iterator* NewIter(IterOptions& opts);
 
  private:
-  uintptr_t handle_;
   bool closed_;
 
   DB(uintptr_t new_handle);
   void checkValid();
 };
 
-}  // namespace pebble
-}  // namespace cockroachdb
+}  // namespace cockroachdb::pebble

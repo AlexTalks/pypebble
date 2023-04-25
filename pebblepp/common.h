@@ -2,8 +2,7 @@
 
 #include <cstdint>
 
-namespace cockroachdb {
-namespace pebble {
+namespace cockroachdb::pebble {
 
 class CGoHandle {
  public:
@@ -18,5 +17,4 @@ class CGoHandle {
  protected:
   uintptr_t handle_;
 };
-}  // namespace pebble
-}  // namespace cockroachdb
+}  // namespace cockroachdb::pebble

@@ -2,8 +2,7 @@
 
 #include "libpebble.h"
 
-namespace cockroachdb {
-namespace pebble {
+namespace cockroachdb::pebble {
 
 IterOptions::IterOptions() : CGoHandle(PebbleNewIterOptions()) {}
 IterOptions::~IterOptions() {}
@@ -108,7 +107,7 @@ std::string Iterator::Key() {
 
 std::string Iterator::PrettyKey() {
   bytes_t ret = PebbleIterKey(handle_);
-  return std::string(::PrettyKey(ret.val, ret.len));
+  return ::PrettyPrintKey(ret.val, ret.len);
 }
 
 std::string Iterator::Value() {
@@ -144,5 +143,4 @@ int Iterator::ReadAmp() { return PebbleIterReadAmp(handle_); }
 
 void Iterator::ResetStats() { PebbleIterResetStats(handle_); }
 
-}  // namespace pebble
-}  // namespace cockroachdb
+}  // namespace cockroachdb::pebble

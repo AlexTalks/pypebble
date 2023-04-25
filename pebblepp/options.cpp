@@ -2,8 +2,7 @@
 
 #include "libpebble.h"
 
-namespace cockroachdb {
-namespace pebble {
+namespace cockroachdb::pebble {
 
 Options* BasicOptions(bool read_write) { return new Options(PebbleBasicOptions(read_write)); }
 
@@ -21,5 +20,4 @@ Options* PebbleOptions(bool read_write, bool use_cockroach_interfaces, int l0_co
       mem_table_stop_writes_threshold, block_size, index_block_size));
 }
 
-}  // namespace pebble
-}  // namespace cockroachdb
+}  // namespace cockroachdb::pebble

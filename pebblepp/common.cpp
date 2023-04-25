@@ -2,8 +2,7 @@
 
 #include "libpebble.h"
 
-namespace cockroachdb {
-namespace pebble {
+namespace cockroachdb::pebble {
 
 CGoHandle::CGoHandle(uintptr_t new_handle) : handle_(new_handle) {}
 
@@ -13,5 +12,4 @@ CGoHandle::~CGoHandle() {
   }
 }
 
-}  // namespace pebble
-}  // namespace cockroachdb
+}  // namespace cockroachdb::pebble

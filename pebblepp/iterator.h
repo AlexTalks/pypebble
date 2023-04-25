@@ -7,8 +7,7 @@
 
 #include "pebblepp/common.h"
 
-namespace cockroachdb {
-namespace pebble {
+namespace cockroachdb::pebble {
 
 enum IterKeyType { kPointsOnly = 0, kRangesOnly = 1, kPointsAndRanges = 2 };
 enum IterValidityState { kExhausted = 0, kValid = 1, kAtLimit = 2 };
@@ -64,8 +63,9 @@ class Iterator : public CGoHandle {
   std::pair<std::string, std::string> RangeBounds();
 
   std::string Key();
-  std::string PrettyKey();
   std::string Value();
+  // TODO(sarkesian): potentially remove, use converter for keys
+  std::string PrettyKey();
   // TODO(sarkesian): implement RangeKeyData[] RangeKeys()
 
   bool Valid();
@@ -85,5 +85,4 @@ class Iterator : public CGoHandle {
   Iterator(uintptr_t new_handle);
 };
 
-}  // namespace pebble
-}  // namespace cockroachdb
+}  // namespace cockroachdb::pebble

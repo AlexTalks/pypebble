@@ -56,7 +56,7 @@ typedef struct {
 
 #line 1 "cgo-generated-wrapper"
 
-#line 9 "keys.go"
+#line 10 "keys.go"
 
 #include "libpebble-common.h"
 
@@ -162,7 +162,8 @@ extern void PebbleIterSetOptions(uintptr_t iterPtr, uintptr_t optsPtr);
 extern GoInt PebbleIterReadAmp(uintptr_t iterPtr);
 extern void PebbleIterResetStats(uintptr_t iterPtr);
 extern void PebbleIterStats(uintptr_t iterPtr);
-extern cchar_t* PrettyKey(void* keyBytes, int keyLen);
+extern cchar_t* PrettyPrintKey(void* keyBytes, int keyLen);
+extern bytes_and_error_t PrettyScanKey(cchar_t* keyCStr);
 extern handle_and_error_t PebbleOpen(cchar_t* name, uintptr_t optsPtr);
 extern cchar_t* PebbleClose(uintptr_t dbPtr);
 extern bytes_and_error_t PebbleGet(uintptr_t dbPtr, void* keyBytes, int keyLen);

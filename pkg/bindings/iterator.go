@@ -107,7 +107,7 @@ func PebbleIterClone(
 	})
 
 	if err != nil {
-		return C.handle_and_error_t{errMsg: C.CString(err.Error())}
+		return C.handle_and_error_t{err_msg: C.CString(err.Error())}
 	}
 	return C.handle_and_error_t{handle: C.uintptr_t(NewCGoHandle(cloned).Handle)}
 }

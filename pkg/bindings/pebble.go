@@ -20,7 +20,7 @@ func PebbleOpen(name *C.cchar_t, optsPtr C.uintptr_t) C.handle_and_error_t {
 	}
 	db, err := pebble.Open(C.GoString(name), opts)
 	if err != nil {
-		return C.handle_and_error_t{errMsg: C.CString(err.Error())}
+		return C.handle_and_error_t{err_msg: C.CString(err.Error())}
 	}
 	return C.handle_and_error_t{handle: C.uintptr_t(NewCGoHandle(db).Handle)}
 }
@@ -43,12 +43,12 @@ func PebbleGet(dbPtr C.uintptr_t, keyBytes unsafe.Pointer, keyLen C.int) C.bytes
 	key := C.GoBytes(keyBytes, keyLen)
 	val, closer, err := db.Get(key)
 	if err != nil {
-		return C.bytes_and_error_t{bytes: C.bytes_t{}, errMsg: C.CString(err.Error())}
+		return C.bytes_and_error_t{bytes: C.bytes_t{}, err_msg: C.CString(err.Error())}
 	}
 	valLen := C.int64_t(len(val))
 	valBytes := C.CBytes(val)
 	defer closer.Close()
-	return C.bytes_and_error_t{bytes: C.bytes_t{val: valBytes, len: valLen}, errMsg: nil}
+	return C.bytes_and_error_t{bytes: C.bytes_t{val: valBytes, len: valLen}, err_msg: nil}
 }
 
 // TODO(sarkesian): Support EngineKey encoding/decoding

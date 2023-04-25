@@ -5,8 +5,7 @@
 #include "pebblepp/pebble.h"
 using namespace boost::python;
 
-namespace cockroachdb {
-namespace pebble {
+namespace cockroachdb::pebble {
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(basic_options_overloads, BasicOptions, 0, 1)
 BOOST_PYTHON_FUNCTION_OVERLOADS(cockroach_options_overloads, CockroachDefaultOptions, 0, 1)
@@ -34,7 +33,7 @@ BOOST_PYTHON_MODULE(pypebble) {
       cockroach_options_overloads(
           args("read_write"),
           "cockroach default options")[return_value_policy<manage_new_object>()]);
-  // TODO(sarkesian): Convert the below arguments to kwargs.
+  // TODO(sarkesian): Convert the below arguments to kwargs, or to a mutable object.
   def("PebbleOptions", &PebbleOptions,
       args("read_write", "use_cockroach_interfaces", "l0_compaction_threshold",
            "l0_stop_writes_threshold", "lbase_max_bytes", "levels", "max_concurrent_compactions",
@@ -75,6 +74,7 @@ BOOST_PYTHON_MODULE(pypebble) {
       //.def("HasPointAndRange", &Iterator::HasPointAndRange)
       .def("RangeBounds", &Iterator::RangeBounds)
       .def("Key", &Iterator::Key)
+      // TODO(sarkesian): potentially remove, use converter for keys
       .def("PrettyKey", &Iterator::PrettyKey)
       .def("Value", &Iterator::Value)
       //.def("RangeKeys", &Iterator::RangeKeys)
@@ -107,7 +107,8 @@ BOOST_PYTHON_MODULE(pypebble) {
       "opens a new pebble.DB");
   def("CGoHandles", &CGoHandles,
       "number of live handles to Go-managed memory available to C/Python");
+  def("PrettyPrintKey", &PrettyPrintKey, "pretty-print a CockroachDB key");
+  def("PrettyScanKey", &PrettyScanKey, "scan a human-readable CockroachDB key");
 }
 
-}  // namespace pebble
-}  // namespace cockroachdb
+}  // namespace cockroachdb::pebble
