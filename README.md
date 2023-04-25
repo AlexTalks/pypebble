@@ -1,10 +1,10 @@
 # pypebble
 
 A work-in-progress Python wrapper for CockroachDB's [Pebble](https://github.com/cockroachdb/pebble) 
-storage engine, using a cgo and C++/Boost.Python-based interface.
+storage engine, using a cgo and C++/pybind11-based interface.
 
 ## Building
-Requires: cmake (>=3.5), Python (>=3.7), Go, a C++ compiler.
+Requires: cmake (>=3.5), Python (>=3.7), Pybind11, Go >=1.19, a C++ compiler.
 ```shell
 $ go build -buildmode=c-shared -o libpebble.so ./pkg/bindings
 $ mkdir build && cd build
