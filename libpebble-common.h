@@ -8,7 +8,7 @@ typedef const char cchar_t;
 
 typedef struct {
 	uintptr_t handle;
-	const char* errMsg;
+	cchar_t* errMsg;
 } handle_and_error_t;
 
 typedef struct {
@@ -18,7 +18,7 @@ typedef struct {
 
 typedef struct {
 	bytes_t bytes;
-	const char* errMsg;
+	cchar_t* errMsg;
 } bytes_and_error_t;
 
 #endif
