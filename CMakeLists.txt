@@ -16,7 +16,7 @@ set(CMAKE_SHARED_MODULE_PREFIX "")
 file(GLOB GO_BINDING_SRCS ${CMAKE_SOURCE_DIR}/pkg/bindings/*.go)
 add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/libpebble.so ${CMAKE_BINARY_DIR}/libpebble.h
-    COMMAND CGO_CPPFLAGS="-I${CMAKE_SOURCE_DIR}" go build -buildmode=c-shared -o libpebble.so ${CMAKE_SOURCE_DIR}/pkg/bindings
+    COMMAND GODEBUG=cgocheck=0 CGO_CPPFLAGS="-I${CMAKE_SOURCE_DIR}" go build -buildmode=c-shared -o libpebble.so ${CMAKE_SOURCE_DIR}/pkg/bindings
     # Also copy generated header to source dir so it can be under version control.
     COMMAND cp ${CMAKE_BINARY_DIR}/libpebble.h ${CMAKE_SOURCE_DIR}/libpebble.h
     DEPENDS ${CMAKE_SOURCE_DIR}/libpebble-common.h ${GO_BINDING_SRCS}

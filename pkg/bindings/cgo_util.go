@@ -1,6 +1,10 @@
 package main
 
-import "runtime/cgo"
+import (
+	"fmt"
+	"runtime/cgo"
+	"unsafe"
+)
 
 /*
 #include "libpebble-common.h"
@@ -43,4 +47,23 @@ func LiveCGoHandles() int {
 //export ReleaseHandle
 func ReleaseHandle(ptr C.uintptr_t) {
 	CGoHandle(ptr).Delete()
+}
+
+var dbg_global_str_ptr *string
+
+//export MakeString
+func MakeString() string {
+	var sptr *string
+	if dbg_global_str_ptr != nil {
+		sptr = dbg_global_str_ptr
+	} else {
+		s := "hello from go!"
+		sptr = &s
+		dbg_global_str_ptr = sptr
+	}
+
+	ptr := unsafe.Pointer(C._GoStringPtr(*sptr))
+	l := C._GoStringLen(*sptr)
+	fmt.Printf("(dbg) (CGo ) addr: %p, len: %d\n", ptr, int(l))
+	return *sptr
 }

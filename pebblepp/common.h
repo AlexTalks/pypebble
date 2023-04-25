@@ -14,6 +14,8 @@ class CGoHandle {
 
   friend class DB;
 
+  virtual uintptr_t dbg_handle() const { return handle_; }
+
  protected:
   uintptr_t handle_;
 };

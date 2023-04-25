@@ -19,7 +19,7 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 /* Start of preamble from import "C" comments.  */
 
 
-#line 5 "cgo_util.go"
+#line 9 "cgo_util.go"
 
 #include "libpebble-common.h"
 
@@ -62,7 +62,7 @@ typedef struct {
 
 #line 1 "cgo-generated-wrapper"
 
-#line 9 "pebble.go"
+#line 10 "pebble.go"
 
 #include "libpebble-common.h"
 
@@ -130,6 +130,7 @@ extern "C" {
 
 extern GoInt LiveCGoHandles();
 extern void ReleaseHandle(uintptr_t ptr);
+extern GoString MakeString();
 extern uintptr_t PebbleNewIterOptions();
 extern uintptr_t PebbleIterOptionsClone(uintptr_t optsPtr);
 extern bytes_t PebbleIterOptionsGetBound(uintptr_t optsPtr, GoUint8 upper);

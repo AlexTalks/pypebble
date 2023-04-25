@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"unsafe"
 
 	"github.com/cockroachdb/pebble"
@@ -47,6 +48,13 @@ func PebbleGet(dbPtr C.uintptr_t, keyBytes unsafe.Pointer, keyLen C.int) C.bytes
 	}
 	valLen := C.int64_t(len(val))
 	valBytes := C.CBytes(val)
+	/*
+		std::cout << "(dbg) (Get ) "
+		            << "addr: " << std::hex << getResult.bytes.val << ", "
+		            << "len: " << std::dec << getResult.bytes.len << ", "
+		            << "val: " << std::string((char*)getResult.bytes.val, getResult.bytes.len) << std::endl;
+	*/
+	fmt.Printf("(dbg) (CGo ) addr: %p, len: %d\n", valBytes, valLen)
 	defer closer.Close()
 	return C.bytes_and_error_t{bytes: C.bytes_t{val: valBytes, len: valLen}, err_msg: nil}
 }
