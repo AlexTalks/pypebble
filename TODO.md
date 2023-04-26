@@ -1,7 +1,13 @@
 # TODO
 
 Functions and functionality to be implemented.
-LOC thus far: 1320.
+LOC thus far: 1720.
+
+Priorities:
+* Exposing DB-level metrics
+* Manual compactions, various knobs around compactions (observability?)
+* Range Key support
+* Ability to look at storage layers (WAL, memtable, SSTs) separately?
 
 ## `pebble.DB` Functions
 
@@ -13,7 +19,6 @@ func (d *DB) RangeKeyDelete(start, end []byte, opts *WriteOptions) error
 func (d *DB) Apply(batch *Batch, opts *WriteOptions) error
 func (d *DB) NewBatch() *Batch
 func (d *DB) NewIndexedBatch() *Batch
-//func (d *DB) NewIter(o *IterOptions) *Iterator    // Done
 func (d *DB) NewSnapshot() *Snapshot
 func (d *DB) Compact(start, end []byte, parallelize bool) error
 func (d *DB) Flush() error
@@ -100,10 +105,6 @@ func (b *Batch) NewIterWithContext(ctx context.Context, o *IterOptions) *Iterato
 func (i *Iterator) RangeKeys() []RangeKeyData   // need to implement Go->CGo array conversion
 ```
 
-### Unneeded
-```go
-func (i *Iterator) CloneWithContext(ctx context.Context, opts CloneOptions) (*Iterator, error)
-```
 
 ## Other Structs/Options/Configs/Enums
 * `BatchReader` - might be simple, just exposes a `Next(..)` function.
@@ -111,8 +112,6 @@ func (i *Iterator) CloneWithContext(ctx context.Context, opts CloneOptions) (*It
 * `Metrics` - large, unwieldy 
 * `SSTableInfo` - is this needed?  probably not 
 * `BatchCommitStats` - probably not needed immediately, somewhat simple to expose
-* `RangeKeyData` - simple struct
-* `IteratorStats` - relatively simple struct
 
 ## Core Interfaces
 
@@ -156,5 +155,4 @@ type batch interface {
 	Delete(key []byte, opts *pebble.WriteOptions) error
 	LogData(data []byte, opts *pebble.WriteOptions) error
 }
-
 ```

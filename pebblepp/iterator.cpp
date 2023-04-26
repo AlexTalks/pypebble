@@ -20,8 +20,10 @@ IterOptions& IterOptions::operator=(const IterOptions& other) {
 }
 
 std::string IterOptions::LowerBound() const {
-  bytes_t bound = PebbleIterOptionsGetBound(handle_, false);
-  return std::string((char*)bound.val, bound.len);
+  bytes_t ret = PebbleIterOptionsGetBound(handle_, false);
+  auto bound = std::string((char*)ret.val, ret.len);
+  free(ret.val);
+  return bound;
 }
 
 void IterOptions::SetLowerBound(const std::string& bound) {
@@ -29,8 +31,10 @@ void IterOptions::SetLowerBound(const std::string& bound) {
 }
 
 std::string IterOptions::UpperBound() const {
-  bytes_t bound = PebbleIterOptionsGetBound(handle_, true);
-  return std::string((char*)bound.val, bound.len);
+  bytes_t ret = PebbleIterOptionsGetBound(handle_, true);
+  auto bound = std::string((char*)ret.val, ret.len);
+  free(ret.val);
+  return bound;
 }
 
 void IterOptions::SetUpperBound(const std::string& bound) {
@@ -110,17 +114,23 @@ std::pair<std::string, std::string> Iterator::RangeBounds() {
   bounds_t bounds = PebbleIterRangeBounds(handle_);
   std::string start((char*)bounds.start.val, bounds.start.len);
   std::string end((char*)bounds.end.val, bounds.end.len);
+  free(bounds.start.val);
+  free(bounds.end.val);
   return std::pair(start, end);
 }
 
 std::string Iterator::Key() {
   bytes_t ret = PebbleIterKey(handle_);
-  return std::string((char*)ret.val, ret.len);
+  auto key = std::string((char*)ret.val, ret.len);
+  free(ret.val);
+  return key;
 }
 
 std::string Iterator::Value() {
   bytes_t ret = PebbleIterValue(handle_);
-  return std::string((char*)ret.val, ret.len);
+  auto val = std::string((char*)ret.val, ret.len);
+  free(ret.val);
+  return val;
 }
 
 std::vector<RangeKeyData> Iterator::RangeKeys() {
@@ -133,6 +143,8 @@ std::vector<RangeKeyData> Iterator::RangeKeys() {
           std::string((char*)elem.suffix.val, elem.suffix.len),
           std::string((char*)elem.value.val, elem.value.len)
       };
+      free(elem.suffix.val);
+      free(elem.value.val);
       range_keys.push_back(range_key);
     }
 
@@ -141,7 +153,9 @@ std::vector<RangeKeyData> Iterator::RangeKeys() {
 
 std::string Iterator::PrettyKey() {
   bytes_t ret = PebbleIterKey(handle_);
-  return ::PrettyPrintKey(ret.val, ret.len);
+  std::string pretty_key(::PrettyPrintKey(ret.val, ret.len));
+  free(ret.val);
+  return pretty_key;
 }
 
 bool Iterator::Valid() { return PebbleIterValid(handle_); }

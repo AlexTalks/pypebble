@@ -6,7 +6,6 @@ storage engine, using a cgo and C++/pybind11-based interface.
 ## Building
 Requires: cmake (>=3.5), Python (>=3.7), Pybind11, Go >=1.19, a C++ compiler.
 ```shell
-$ go build -buildmode=c-shared -o libpebble.so ./pkg/bindings
 $ mkdir build && cd build
 $ cmake ..
 $ make pypebble
@@ -26,18 +25,20 @@ $ clang++ -Wall --std=c++17 -o pebtest.out -fPIC pebblepp/*.cpp -I. -L. -lpebble
 ```
 
 ## Python Usage
-(Make sure `[libpebble|pypebble].so` files are on the PATH)
+Make sure `[libpebble|pypebble].so` files are on the PATH.
+
+You may need to set `DYLD_LIBRARY_PATH=/path/to/libpebble.so` as well.
 ```python
 >>> import pypebble
->>> db = pypebble.Open("tmp", pypebble.BasicOptions())
->>> db.Set("name", "pebble!", True)
->>> db.Get("name")
-'pebble!'
->>> db.Get("other")
+>>> db = pypebble.open("tmp", read_write=True)
+>>> db.set(b"name", b"pebble!", sync=True)
+>>> db.get(b"name")
+b'pebble!'
+>>> db.get(b"other")
 Traceback (most recent call last):
 File "<stdin>", line 1, in <module>
 RuntimeError: pebble: not found
->>> db.NumFiles()
+>>> db.num_files()
 1
->>> db.Close()
+>>> db.close()
 ```

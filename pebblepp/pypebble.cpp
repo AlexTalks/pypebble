@@ -31,7 +31,12 @@ PYBIND11_MODULE(pypebble, m) {
   m.def("cgo_handles", &CGoHandles,
         "Number of live handles to Go-managed memory available to C/Python.");
   m.def("pretty_key", &PrettyPrintKey, "Pretty-print a CockroachDB key.");
-  m.def("scan_key", &PrettyScanKey, "Scan a human-readable CockroachDB key.");
+  m.def(
+      "scan_key",
+      [](const std::string& human_key) {
+        return py::bytes(PrettyScanKey(human_key));
+      },
+      "Scan a human-readable CockroachDB key.");
 
   py::class_<Object>(m, "_Object").def_property_readonly("go_type", &Object::GoType);
 

@@ -15,7 +15,9 @@ std::string PrettyScanKey(const std::string& human_key) {
   if (result.err_msg) {
     throw std::runtime_error(result.err_msg);
   }
-  return std::string((char*)result.bytes.val, result.bytes.len);
+  auto key = std::string((char*)result.bytes.val, result.bytes.len);
+  free(result.bytes.val);
+  return key;
 }
 
 DB::DB(uintptr_t new_handle) : CGoHandle(new_handle), closed_(false) {}
@@ -67,7 +69,9 @@ std::string DB::Get(const std::string& key) {
     throw std::runtime_error(get_result.err_msg);
   }
 
-  return std::string((char*)get_result.bytes.val, get_result.bytes.len);
+  auto val = std::string((char*)get_result.bytes.val, get_result.bytes.len);
+  free(get_result.bytes.val);
+  return val;
 }
 
 void DB::Set(const std::string& key, const std::string& val, bool sync) {
