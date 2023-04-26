@@ -8,6 +8,7 @@ import (
 
 /*
 #include "libpebble-common.h"
+#include <stdlib.h>	// for malloc
 
 typedef enum {
 	ITER_KEY_TYPE_POINTS_ONLY = 0,
@@ -22,16 +23,38 @@ typedef enum {
 } iter_validity_state_t;
 
 typedef struct {
-	bool hasPoint;
-	bool hasRange;
+	bool has_point;
+	bool has_range;
 } iter_has_point_and_range_t;
 
 typedef struct {
-	void* startVal;
-	int64_t startLen;
-	void* endVal;
-	int64_t endLen;
+	bytes_t start;
+	bytes_t end;
 } bounds_t;
+
+typedef struct {
+	bytes_t suffix;
+	bytes_t value;
+} range_key_data_t;
+
+typedef struct {
+	range_key_data_t* elems;
+	int64_t len;
+} range_key_data_vector_t;
+
+typedef struct {
+	int64_t forward_seek_count;
+	int64_t reverse_seek_count;
+	int64_t forward_step_count;
+	int64_t reverse_step_count;
+} iterator_stats_counts_t;
+
+typedef struct {
+	// Represents calls through the interface.
+	iterator_stats_counts_t interface_stats;
+	// Represents calls to underlying iterator.
+	iterator_stats_counts_t internal_stats;
+} iterator_stats_t;
 
 */
 import "C"
@@ -62,9 +85,7 @@ func PebbleIterOptionsGetBound(optsPtr C.uintptr_t, upper bool) C.bytes_t {
 		bound = opts.LowerBound
 	}
 
-	boundLen := C.int64_t(len(bound))
-	boundBytes := C.CBytes(bound)
-	return C.bytes_t{val: boundBytes, len: boundLen}
+	return toCBytes(bound)
 }
 
 //export PebbleIterOptionsSetBound
@@ -213,7 +234,7 @@ func PebbleIterRangeKeyChanged(iterPtr C.uintptr_t) bool {
 func PebbleIterHasPointAndRange(iterPtr C.uintptr_t) C.iter_has_point_and_range_t {
 	iter := CGoHandle(iterPtr).Value().(*pebble.Iterator)
 	p, r := iter.HasPointAndRange()
-	return C.iter_has_point_and_range_t{hasPoint: C.bool(p), hasRange: C.bool(r)}
+	return C.iter_has_point_and_range_t{has_point: C.bool(p), has_range: C.bool(r)}
 }
 
 //export PebbleIterRangeBounds
@@ -221,8 +242,8 @@ func PebbleIterRangeBounds(iterPtr C.uintptr_t) C.bounds_t {
 	iter := CGoHandle(iterPtr).Value().(*pebble.Iterator)
 	start, end := iter.RangeBounds()
 	return C.bounds_t{
-		startVal: C.CBytes(start), startLen: C.int64_t(len(start)),
-		endVal: C.CBytes(end), endLen: C.int64_t(len(end)),
+		start: toCBytes(start),
+		end:   toCBytes(end),
 	}
 }
 
@@ -230,19 +251,20 @@ func PebbleIterRangeBounds(iterPtr C.uintptr_t) C.bounds_t {
 func PebbleIterKey(iterPtr C.uintptr_t) C.bytes_t {
 	iter := CGoHandle(iterPtr).Value().(*pebble.Iterator)
 	key := iter.Key()
-	return C.bytes_t{val: C.CBytes(key), len: C.int64_t(len(key))}
+	return toCBytes(key)
 }
 
 //export PebbleIterValue
 func PebbleIterValue(iterPtr C.uintptr_t) C.bytes_t {
 	iter := CGoHandle(iterPtr).Value().(*pebble.Iterator)
 	val := iter.Value()
-	return C.bytes_t{val: C.CBytes(val), len: C.int64_t(len(val))}
+	return toCBytes(val)
 }
 
 //export PebbleIterRangeKeys
-func PebbleIterRangeKeys(iterPtr C.uintptr_t) {
-	panic("not implemented")
+func PebbleIterRangeKeys(iterPtr C.uintptr_t) C.range_key_data_vector_t {
+	pebble.DefaultLogger.Infof("WARNING: RangeKeys() not yet implemented.")
+	return C.range_key_data_vector_t{}
 }
 
 //export PebbleIterValid
@@ -305,6 +327,22 @@ func PebbleIterResetStats(iterPtr C.uintptr_t) {
 }
 
 //export PebbleIterStats
-func PebbleIterStats(iterPtr C.uintptr_t) {
-	panic("not implemented")
+func PebbleIterStats(iterPtr C.uintptr_t) C.iterator_stats_t {
+	iter := CGoHandle(iterPtr).Value().(*pebble.Iterator)
+	stats := iter.Stats()
+	// TODO(sarkesian): Expose internal stats, range key stats.
+	return C.iterator_stats_t{
+		interface_stats: C.iterator_stats_counts_t{
+			forward_seek_count: C.int64_t(stats.ForwardSeekCount[pebble.InterfaceCall]),
+			reverse_seek_count: C.int64_t(stats.ReverseSeekCount[pebble.InterfaceCall]),
+			forward_step_count: C.int64_t(stats.ForwardStepCount[pebble.InterfaceCall]),
+			reverse_step_count: C.int64_t(stats.ReverseStepCount[pebble.InterfaceCall]),
+		},
+		internal_stats: C.iterator_stats_counts_t{
+			forward_seek_count: C.int64_t(stats.ForwardSeekCount[pebble.InternalIterCall]),
+			reverse_seek_count: C.int64_t(stats.ReverseSeekCount[pebble.InternalIterCall]),
+			forward_step_count: C.int64_t(stats.ForwardStepCount[pebble.InternalIterCall]),
+			reverse_step_count: C.int64_t(stats.ReverseStepCount[pebble.InternalIterCall]),
+		},
+	}
 }

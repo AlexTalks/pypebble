@@ -12,6 +12,13 @@ import "C"
 
 var liveCGoHandles = 0
 
+func toCBytes(value []byte) C.bytes_t {
+	if value == nil {
+		return C.bytes_t{}
+	}
+	return C.bytes_t{val: C.CBytes(value), len: C.int64_t(len(value))}
+}
+
 type HandleWrapper struct {
 	cgo.Handle
 }

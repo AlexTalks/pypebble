@@ -57,20 +57,17 @@ void DB::Close() {
     throw std::runtime_error(err);
   }
 
-  ReleaseHandle(handle_);
-
   closed_ = true;
-  handle_ = 0;
 }
 
 std::string DB::Get(const std::string& key) {
   checkValid();
-  bytes_and_error_t getResult = PebbleGet(handle_, (void*)key.data(), key.length());
-  if (getResult.err_msg) {
-    throw std::runtime_error(getResult.err_msg);
+  bytes_and_error_t get_result = PebbleGet(handle_, (void*)key.data(), key.length());
+  if (get_result.err_msg) {
+    throw std::runtime_error(get_result.err_msg);
   }
 
-  return std::string((char*)getResult.bytes.val, getResult.bytes.len);
+  return std::string((char*)get_result.bytes.val, get_result.bytes.len);
 }
 
 void DB::Set(const std::string& key, const std::string& val, bool sync) {

@@ -28,6 +28,7 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 #line 9 "iterator.go"
 
 #include "libpebble-common.h"
+#include <stdlib.h>	// for malloc
 
 typedef enum {
 	ITER_KEY_TYPE_POINTS_ONLY = 0,
@@ -42,16 +43,38 @@ typedef enum {
 } iter_validity_state_t;
 
 typedef struct {
-	bool hasPoint;
-	bool hasRange;
+	bool has_point;
+	bool has_range;
 } iter_has_point_and_range_t;
 
 typedef struct {
-	void* startVal;
-	int64_t startLen;
-	void* endVal;
-	int64_t endLen;
+	bytes_t start;
+	bytes_t end;
 } bounds_t;
+
+typedef struct {
+	bytes_t suffix;
+	bytes_t value;
+} range_key_data_t;
+
+typedef struct {
+	range_key_data_t* elems;
+	int64_t len;
+} range_key_data_vector_t;
+
+typedef struct {
+	int64_t forward_seek_count;
+	int64_t reverse_seek_count;
+	int64_t forward_step_count;
+	int64_t reverse_step_count;
+} iterator_stats_counts_t;
+
+typedef struct {
+	// Represents calls through the interface.
+	iterator_stats_counts_t interface_stats;
+	// Represents calls to underlying iterator.
+	iterator_stats_counts_t internal_stats;
+} iterator_stats_t;
 
 
 #line 1 "cgo-generated-wrapper"
@@ -154,7 +177,7 @@ extern iter_has_point_and_range_t PebbleIterHasPointAndRange(uintptr_t iterPtr);
 extern bounds_t PebbleIterRangeBounds(uintptr_t iterPtr);
 extern bytes_t PebbleIterKey(uintptr_t iterPtr);
 extern bytes_t PebbleIterValue(uintptr_t iterPtr);
-extern void PebbleIterRangeKeys(uintptr_t iterPtr);
+extern range_key_data_vector_t PebbleIterRangeKeys(uintptr_t iterPtr);
 extern GoUint8 PebbleIterValid(uintptr_t iterPtr);
 extern cchar_t* PebbleIterError(uintptr_t iterPtr);
 extern cchar_t* PebbleIterClose(uintptr_t iterPtr);
@@ -162,7 +185,7 @@ extern void PebbleIterSetBounds(uintptr_t iterPtr, void* lowerBoundPtr, int lowe
 extern void PebbleIterSetOptions(uintptr_t iterPtr, uintptr_t optsPtr);
 extern GoInt PebbleIterReadAmp(uintptr_t iterPtr);
 extern void PebbleIterResetStats(uintptr_t iterPtr);
-extern void PebbleIterStats(uintptr_t iterPtr);
+extern iterator_stats_t PebbleIterStats(uintptr_t iterPtr);
 extern cchar_t* PrettyPrintKey(void* keyBytes, int keyLen);
 extern bytes_and_error_t PrettyScanKey(cchar_t* keyCStr);
 extern handle_and_error_t PebbleOpen(cchar_t* dirName, uintptr_t optsPtr);

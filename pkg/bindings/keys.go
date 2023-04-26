@@ -26,7 +26,5 @@ func PrettyScanKey(keyCStr *C.cchar_t) C.bytes_and_error_t {
 	if err != nil {
 		return C.bytes_and_error_t{bytes: C.bytes_t{}, err_msg: C.CString(err.Error())}
 	}
-	valLen := C.int64_t(len(key))
-	valBytes := C.CBytes(key)
-	return C.bytes_and_error_t{bytes: C.bytes_t{val: valBytes, len: valLen}, err_msg: nil}
+	return C.bytes_and_error_t{bytes: toCBytes(key), err_msg: nil}
 }

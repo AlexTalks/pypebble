@@ -33,7 +33,6 @@ func PebbleClose(dbPtr C.uintptr_t) *C.cchar_t {
 	if err != nil {
 		return C.CString(err.Error())
 	}
-	defer dbHandle.Delete()
 	return nil
 }
 
@@ -45,15 +44,11 @@ func PebbleGet(dbPtr C.uintptr_t, keyBytes unsafe.Pointer, keyLen C.int) C.bytes
 	if err != nil {
 		return C.bytes_and_error_t{bytes: C.bytes_t{}, err_msg: C.CString(err.Error())}
 	}
-	valLen := C.int64_t(len(val))
-	valBytes := C.CBytes(val)
 	defer closer.Close()
-	return C.bytes_and_error_t{bytes: C.bytes_t{val: valBytes, len: valLen}, err_msg: nil}
+	return C.bytes_and_error_t{bytes: toCBytes(val), err_msg: nil}
 }
 
 // TODO(sarkesian): Support EngineKey encoding/decoding
-// TODO(sarkesian): Support Reader interface:
-// 	i.e. iterators, inc. IterOptions (default/Cockroach)
 // TODO(sarkesian): Support Writer interface:
 // 	i.e. Apply(batch), LogData, RangeKeySet/Unset, RangeKeyDelete
 

@@ -5,6 +5,11 @@
 
 namespace cockroachdb::pebble {
 
+namespace base {
+template <typename T>
+using duo = std::pair<T, T>;
+}  // namespace base
+
 struct Object {
   virtual ~Object() = default;
   virtual std::string GoType();

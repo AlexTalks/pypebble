@@ -97,9 +97,7 @@ func (b *Batch) NewIterWithContext(ctx context.Context, o *IterOptions) *Iterato
 
 ```go
 
-func (i *Iterator) RangeKeys() []RangeKeyData   // needed?
-func (i *Iterator) Metrics() IteratorMetrics    // changed to IterReadAmp()
-func (i *Iterator) Stats() IteratorStats        // not yet implemented
+func (i *Iterator) RangeKeys() []RangeKeyData   // need to implement Go->CGo array conversion
 ```
 
 ### Unneeded
