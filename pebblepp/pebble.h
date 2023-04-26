@@ -16,8 +16,8 @@ std::string PrettyScanKey(const std::string& human_key);
 
 class DB : public CGoHandle {
  public:
-  static DB* Open(const std::string& name);
-  static DB* Open(const std::string& name, const Options* options);
+  static DB* Open(const std::string& path, bool read_write = false);
+  static DB* Open(const std::string& path, const Options* options);
 
   int64_t NumFiles();
   void Close();
@@ -35,6 +35,7 @@ class DB : public CGoHandle {
   void DeleteRange(const std::string& start_key, const std::string& end_key, bool sync = true);
   void Merge(const std::string& key, const std::string& val, bool sync = true);
 
+  Iterator* NewIter();
   Iterator* NewIter(IterOptions& opts);
 
  private:

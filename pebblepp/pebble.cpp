@@ -21,13 +21,13 @@ std::string PrettyScanKey(const std::string& human_key) {
 DB::DB(uintptr_t new_handle) : CGoHandle(new_handle), closed_(false) {}
 DB::~DB() {}
 
-DB* DB::Open(const std::string& name) {
-  Options basicOptions(PebbleBasicOptions(true));
-  return DB::Open(name, &basicOptions);
+DB* DB::Open(const std::string& path, bool read_write) {
+  Options basicOptions(PebbleBasicOptions(read_write));
+  return DB::Open(path, &basicOptions);
 }
 
-DB* DB::Open(const std::string& name, const Options* options) {
-  handle_and_error_t result = PebbleOpen(name.c_str(), options->handle_);
+DB* DB::Open(const std::string& path, const Options* options) {
+  handle_and_error_t result = PebbleOpen(path.c_str(), options->handle_);
   if (result.err_msg) {
     throw std::runtime_error(result.err_msg);
   }
@@ -56,6 +56,8 @@ void DB::Close() {
   if (err) {
     throw std::runtime_error(err);
   }
+
+  ReleaseHandle(handle_);
 
   closed_ = true;
   handle_ = 0;
@@ -112,6 +114,11 @@ void DB::Merge(const std::string& key, const std::string& val, bool sync) {
   if (err) {
     throw std::runtime_error(err);
   }
+}
+
+Iterator* DB::NewIter() {
+  checkValid();
+  return new Iterator(PebbleNewIter(handle_, IterOptions().handle_));
 }
 
 Iterator* DB::NewIter(IterOptions& opts) {

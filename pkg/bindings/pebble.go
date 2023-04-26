@@ -12,13 +12,13 @@ import (
 import "C"
 
 //export PebbleOpen
-func PebbleOpen(name *C.cchar_t, optsPtr C.uintptr_t) C.handle_and_error_t {
+func PebbleOpen(dirName *C.cchar_t, optsPtr C.uintptr_t) C.handle_and_error_t {
 	opts := CGoHandle(optsPtr).Value().(*pebble.Options)
 	if !opts.ReadOnly {
 		pebble.DefaultLogger.Infof("WARNING: opening database in read-write mode. " +
 			"This may cause corruption to an existing database.")
 	}
-	db, err := pebble.Open(C.GoString(name), opts)
+	db, err := pebble.Open(C.GoString(dirName), opts)
 	if err != nil {
 		return C.handle_and_error_t{err_msg: C.CString(err.Error())}
 	}
