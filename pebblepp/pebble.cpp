@@ -1,5 +1,7 @@
 #include "pebblepp/pebble.h"
 
+#include <iostream>
+
 #include "libpebble.h"
 
 namespace cockroachdb::pebble {
@@ -16,6 +18,14 @@ std::string PrettyScanKey(const std::string& human_key) {
     throw std::runtime_error(result.err_msg);
   }
   return std::string((char*)result.bytes.val, result.bytes.len);
+}
+
+std::string_view StringFromGo() {
+  GoString s = MakeString();
+  std::cout << "(dbg) (Cpp ) "
+            << "addr: " << std::hex << (void*)(s.p) << ", "
+            << "len: " << std::dec << s.n << std::endl;
+  return std::string_view(s.p, s.n);
 }
 
 DB::DB(uintptr_t new_handle) : CGoHandle(new_handle), closed_(false) {}
@@ -68,7 +78,17 @@ std::string DB::Get(const std::string& key) {
     throw std::runtime_error(getResult.err_msg);
   }
 
-  return std::string((char*)getResult.bytes.val, getResult.bytes.len);
+  // TODO(sarkesian): use strings, but free any memory returned using C.CBytes in Go.
+  // Also, return
+  std::cout << "(dbg) (Get ) "
+            << "addr: " << std::hex << getResult.bytes.val << ", "
+            << "len: " << std::dec << getResult.bytes.len << ", "
+            << "val: " << std::string((char*)getResult.bytes.val, getResult.bytes.len) << std::endl;
+
+  std::string ret((char*)getResult.bytes.val, getResult.bytes.len);
+  //free(getResult.bytes.val);
+
+  return ret;
 }
 
 void DB::Set(const std::string& key, const std::string& val, bool sync) {

@@ -14,6 +14,8 @@ int CGoHandles();
 std::string PrettyPrintKey(const std::string& key);
 std::string PrettyScanKey(const std::string& human_key);
 
+std::string_view StringFromGo();
+
 class DB : public CGoHandle {
  public:
   static DB* Open(const std::string& name);
