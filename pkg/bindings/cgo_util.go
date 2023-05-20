@@ -1,6 +1,9 @@
 package main
 
-import "runtime/cgo"
+import (
+	"reflect"
+	"runtime/cgo"
+)
 
 /*
 #include "libpebble-common.h"
@@ -8,6 +11,13 @@ import "runtime/cgo"
 import "C"
 
 var liveCGoHandles = 0
+
+func toCBytes(value []byte) C.bytes_t {
+	if value == nil {
+		return C.bytes_t{}
+	}
+	return C.bytes_t{val: C.CBytes(value), len: C.int64_t(len(value))}
+}
 
 type HandleWrapper struct {
 	cgo.Handle
@@ -28,6 +38,12 @@ func (h HandleWrapper) Value() any {
 	return h.Handle.Value()
 }
 
+func (h HandleWrapper) TypeName() string {
+	val := h.Handle.Value()
+	valType := reflect.TypeOf(val)
+	return valType.String()
+}
+
 func (h HandleWrapper) Delete() {
 	defer func() {
 		liveCGoHandles--
@@ -38,6 +54,11 @@ func (h HandleWrapper) Delete() {
 //export LiveCGoHandles
 func LiveCGoHandles() int {
 	return liveCGoHandles
+}
+
+//export HandleTypeName
+func HandleTypeName(ptr C.uintptr_t) *C.cchar_t {
+	return C.CString(CGoHandle(ptr).TypeName())
 }
 
 //export ReleaseHandle

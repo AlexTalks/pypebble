@@ -3,7 +3,9 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 #include <utility>
+#include <vector>
 
 #include "pebblepp/common.h"
 
@@ -32,17 +34,30 @@ class IterOptions : public CGoHandle {
   friend class Iterator;
 };
 
-// TODO(sarkesian): Consider conforming this to C++ std iterator paradigm.
+// RangeKeyData is defined as (suffix, key value).
+struct RangeKeyData {
+  std::string suffix;
+  std::string value;
+};
+
+// IteratorCallStats is defined as counts for:
+// (forward seek, reverse seek, forward step, reverse step).
+typedef std::tuple<int64_t, int64_t, int64_t, int64_t> IteratorCallStats;
+enum { kFwdSeekCount = 0, kRevSeekCount = 1, kFwdStepCount = 2, kRevStepCount = 3 };
+
+// IteratorStats is defined as (interface call stats, internal call stats).
+typedef base::duo<IteratorCallStats> IteratorStats;
+enum { kInterfaceStats = 0, kInternalStats = 1 };
+
 class Iterator : public CGoHandle {
  public:
   // No copying
   Iterator(const Iterator&) = delete;
   void operator=(const Iterator&) = delete;
 
-  // TODO(sarkesian): implement Clone(..)
-  //*Iterator Clone(const IterOptions& opts, bool refreshBatchView);
-
   virtual ~Iterator();
+
+  Iterator* Clone(bool refresh_batch_view = false, const IterOptions* opts = nullptr);
 
   bool SeekGE(const std::string& key);
   IterValidityState SeekGEWithLimit(const std::string& key, const std::string& limit);
@@ -59,14 +74,16 @@ class Iterator : public CGoHandle {
   IterValidityState PrevWithLimit(const std::string& limit);
 
   bool RangeKeyChanged();
-  std::pair<bool, bool> HasPointAndRange();
-  std::pair<std::string, std::string> RangeBounds();
+  base::duo<bool> HasPointAndRange();
+  base::duo<std::string> RangeBounds();
 
   std::string Key();
   std::string Value();
-  // TODO(sarkesian): potentially remove, use converter for keys
+
+  std::vector<RangeKeyData> RangeKeys();
+
+  // TODO(sarkesian): Potentially remove, leaving conversion to separate functions.
   std::string PrettyKey();
-  // TODO(sarkesian): implement RangeKeyData[] RangeKeys()
 
   bool Valid();
   std::optional<std::runtime_error> Error();
@@ -77,7 +94,7 @@ class Iterator : public CGoHandle {
 
   int ReadAmp();
   void ResetStats();
-  // TODO(sarkesian): implement IteratorStats Stats()
+  IteratorStats Stats();
 
   friend class DB;
 

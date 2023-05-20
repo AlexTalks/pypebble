@@ -20,8 +20,10 @@ IterOptions& IterOptions::operator=(const IterOptions& other) {
 }
 
 std::string IterOptions::LowerBound() const {
-  bytes_t bound = PebbleIterOptionsGetBound(handle_, false);
-  return std::string((char*)bound.val, bound.len);
+  bytes_t ret = PebbleIterOptionsGetBound(handle_, false);
+  auto bound = std::string((char*)ret.val, ret.len);
+  free(ret.val);
+  return bound;
 }
 
 void IterOptions::SetLowerBound(const std::string& bound) {
@@ -29,8 +31,10 @@ void IterOptions::SetLowerBound(const std::string& bound) {
 }
 
 std::string IterOptions::UpperBound() const {
-  bytes_t bound = PebbleIterOptionsGetBound(handle_, true);
-  return std::string((char*)bound.val, bound.len);
+  bytes_t ret = PebbleIterOptionsGetBound(handle_, true);
+  auto bound = std::string((char*)ret.val, ret.len);
+  free(ret.val);
+  return bound;
 }
 
 void IterOptions::SetUpperBound(const std::string& bound) {
@@ -47,6 +51,19 @@ void IterOptions::SetKeyTypes(IterKeyType k) {
 
 Iterator::Iterator(uintptr_t new_handle) : CGoHandle(new_handle) {}
 Iterator::~Iterator() {}
+
+Iterator* Iterator::Clone(bool refresh_batch_view, const IterOptions* opts) {
+  uintptr_t opts_handle(0);
+  if (opts) {
+    opts_handle = opts->handle_;
+  }
+  handle_and_error_t result = PebbleIterClone(handle_, opts_handle, refresh_batch_view);
+  if (result.err_msg) {
+    throw std::runtime_error(result.err_msg);
+  }
+
+  return new Iterator(result.handle);
+}
 
 bool Iterator::SeekGE(const std::string& key) {
   return PebbleIterSeekGE(handle_, (void*)key.data(), key.length());
@@ -90,29 +107,55 @@ bool Iterator::RangeKeyChanged() { return PebbleIterRangeKeyChanged(handle_); }
 
 std::pair<bool, bool> Iterator::HasPointAndRange() {
   iter_has_point_and_range_t ret = PebbleIterHasPointAndRange(handle_);
-  return std::pair(ret.hasPoint, ret.hasRange);
+  return std::pair(ret.has_point, ret.has_range);
 }
 
 std::pair<std::string, std::string> Iterator::RangeBounds() {
   bounds_t bounds = PebbleIterRangeBounds(handle_);
-  std::string start((char*)bounds.startVal, bounds.startLen);
-  std::string end((char*)bounds.endVal, bounds.endLen);
+  std::string start((char*)bounds.start.val, bounds.start.len);
+  std::string end((char*)bounds.end.val, bounds.end.len);
+  free(bounds.start.val);
+  free(bounds.end.val);
   return std::pair(start, end);
 }
 
 std::string Iterator::Key() {
   bytes_t ret = PebbleIterKey(handle_);
-  return std::string((char*)ret.val, ret.len);
-}
-
-std::string Iterator::PrettyKey() {
-  bytes_t ret = PebbleIterKey(handle_);
-  return ::PrettyPrintKey(ret.val, ret.len);
+  auto key = std::string((char*)ret.val, ret.len);
+  free(ret.val);
+  return key;
 }
 
 std::string Iterator::Value() {
   bytes_t ret = PebbleIterValue(handle_);
-  return std::string((char*)ret.val, ret.len);
+  auto val = std::string((char*)ret.val, ret.len);
+  free(ret.val);
+  return val;
+}
+
+std::vector<RangeKeyData> Iterator::RangeKeys() {
+    range_key_data_vector_t src_data = PebbleIterRangeKeys(handle_);
+    std::vector<RangeKeyData> range_keys;
+    range_keys.reserve(src_data.len);
+    for (int i = 0; i < src_data.len; i++) {
+      range_key_data_t elem = src_data.elems[i];
+      RangeKeyData range_key{
+          std::string((char*)elem.suffix.val, elem.suffix.len),
+          std::string((char*)elem.value.val, elem.value.len)
+      };
+      free(elem.suffix.val);
+      free(elem.value.val);
+      range_keys.push_back(range_key);
+    }
+
+    return range_keys;
+}
+
+std::string Iterator::PrettyKey() {
+  bytes_t ret = PebbleIterKey(handle_);
+  std::string pretty_key(::PrettyPrintKey(ret.val, ret.len));
+  free(ret.val);
+  return pretty_key;
 }
 
 bool Iterator::Valid() { return PebbleIterValid(handle_); }
@@ -142,5 +185,24 @@ void Iterator::SetOptions(const IterOptions& opts) { PebbleIterSetOptions(handle
 int Iterator::ReadAmp() { return PebbleIterReadAmp(handle_); }
 
 void Iterator::ResetStats() { PebbleIterResetStats(handle_); }
+
+IteratorStats Iterator::Stats() {
+  iterator_stats_t src_stats = PebbleIterStats(handle_);
+  IteratorStats stats;
+
+  auto set_stats = [](IteratorCallStats& dst, iterator_stats_counts_t src) {
+    dst = {
+      src.forward_seek_count,
+      src.reverse_seek_count,
+      src.forward_step_count,
+      src.reverse_step_count
+    };
+  };
+
+  set_stats(stats.first, src_stats.interface_stats);
+  set_stats(stats.second, src_stats.internal_stats);
+
+  return stats;
+}
 
 }  // namespace cockroachdb::pebble

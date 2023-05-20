@@ -15,19 +15,21 @@ std::string PrettyScanKey(const std::string& human_key) {
   if (result.err_msg) {
     throw std::runtime_error(result.err_msg);
   }
-  return std::string((char*)result.bytes.val, result.bytes.len);
+  auto key = std::string((char*)result.bytes.val, result.bytes.len);
+  free(result.bytes.val);
+  return key;
 }
 
 DB::DB(uintptr_t new_handle) : CGoHandle(new_handle), closed_(false) {}
 DB::~DB() {}
 
-DB* DB::Open(const std::string& name) {
-  Options basicOptions(PebbleBasicOptions(true));
-  return DB::Open(name, &basicOptions);
+DB* DB::Open(const std::string& path, bool read_write) {
+  Options basicOptions(PebbleBasicOptions(read_write));
+  return DB::Open(path, &basicOptions);
 }
 
-DB* DB::Open(const std::string& name, const Options* options) {
-  handle_and_error_t result = PebbleOpen(name.c_str(), options->handle_);
+DB* DB::Open(const std::string& path, const Options* options) {
+  handle_and_error_t result = PebbleOpen(path.c_str(), options->handle_);
   if (result.err_msg) {
     throw std::runtime_error(result.err_msg);
   }
@@ -58,17 +60,18 @@ void DB::Close() {
   }
 
   closed_ = true;
-  handle_ = 0;
 }
 
 std::string DB::Get(const std::string& key) {
   checkValid();
-  bytes_and_error_t getResult = PebbleGet(handle_, (void*)key.data(), key.length());
-  if (getResult.err_msg) {
-    throw std::runtime_error(getResult.err_msg);
+  bytes_and_error_t get_result = PebbleGet(handle_, (void*)key.data(), key.length());
+  if (get_result.err_msg) {
+    throw std::runtime_error(get_result.err_msg);
   }
 
-  return std::string((char*)getResult.bytes.val, getResult.bytes.len);
+  auto val = std::string((char*)get_result.bytes.val, get_result.bytes.len);
+  free(get_result.bytes.val);
+  return val;
 }
 
 void DB::Set(const std::string& key, const std::string& val, bool sync) {
@@ -112,6 +115,11 @@ void DB::Merge(const std::string& key, const std::string& val, bool sync) {
   if (err) {
     throw std::runtime_error(err);
   }
+}
+
+Iterator* DB::NewIter() {
+  checkValid();
+  return new Iterator(PebbleNewIter(handle_, IterOptions().handle_));
 }
 
 Iterator* DB::NewIter(IterOptions& opts) {
