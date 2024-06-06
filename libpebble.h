@@ -85,7 +85,7 @@ typedef struct {
 
 #line 1 "cgo-generated-wrapper"
 
-#line 9 "pebble.go"
+#line 11 "pebble.go"
 
 #include "libpebble-common.h"
 
@@ -196,11 +196,11 @@ extern cchar_t* PebbleDelete(uintptr_t dbPtr, void* keyBytes, int keyLen, GoUint
 extern cchar_t* PebbleSingleDelete(uintptr_t dbPtr, void* keyBytes, int keyLen, GoUint8 sync);
 extern cchar_t* PebbleDeleteRange(uintptr_t dbPtr, void* startKeyBytes, int startKeyLen, void* endKeyBytes, int endKeyLen, GoUint8 sync);
 extern cchar_t* PebbleMerge(uintptr_t dbPtr, void* keyBytes, int keyLen, void* valBytes, int valLen, GoUint8 sync);
-extern uintptr_t PebbleNewIter(uintptr_t dbPtr, uintptr_t iterOptionsPtr);
+extern handle_and_error_t PebbleNewIter(uintptr_t dbPtr, uintptr_t iterOptionsPtr);
 extern GoInt64 PebbleNumFiles(uintptr_t dbPtr);
 extern uintptr_t PebbleBasicOptions(GoUint8 readWrite);
 extern uintptr_t PebbleCockroachDefaultOptions(GoUint8 readWrite);
-extern uintptr_t PebbleOptions(GoUint8 readWrite, GoUint8 useCockroachInterfaces, GoInt l0CompactionThreshold, GoInt l0StopWritesThreshold, GoInt64 lBaseMaxBytes, GoInt levels, GoInt maxConcurrentCompactions, GoInt memTableSize, GoInt memTableStopWritesThreshold, GoInt blockSize, GoInt indexBlockSize);
+extern uintptr_t PebbleOptions(GoUint8 readWrite, GoUint8 useCockroachInterfaces, GoInt l0CompactionThreshold, GoInt l0StopWritesThreshold, GoInt64 lBaseMaxBytes, GoInt levels, GoInt maxConcurrentCompactions, GoUint64 memTableSize, GoInt memTableStopWritesThreshold, GoInt blockSize, GoInt indexBlockSize);
 
 #ifdef __cplusplus
 }
