@@ -39,7 +39,7 @@ func PebbleOptions(
 	lBaseMaxBytes int64,
 	levels int,
 	maxConcurrentCompactions int,
-	memTableSize int,
+	memTableSize uint64,
 	memTableStopWritesThreshold int,
 	blockSize int,
 	indexBlockSize int,

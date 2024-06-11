@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"unsafe"
 
 	"github.com/cockroachdb/pebble"
@@ -18,10 +20,25 @@ func PebbleOpen(dirName *C.cchar_t, optsPtr C.uintptr_t) C.handle_and_error_t {
 		pebble.DefaultLogger.Infof("WARNING: opening database in read-write mode. " +
 			"This may cause corruption to an existing database.")
 	}
-	db, err := pebble.Open(C.GoString(dirName), opts)
+	inputPath := C.GoString(dirName)
+	if !filepath.IsAbs(inputPath) {
+		pebble.DefaultLogger.Infof("WARNING: path should be absolute, but \"%s\" was given", inputPath)
+		cwd, err := os.Getwd()
+		if err != nil {
+			return C.handle_and_error_t{err_msg: C.CString(err.Error())}
+		}
+		inputPath = filepath.Join(cwd, inputPath)
+	}
+
+	db, err := pebble.Open(inputPath, opts)
 	if err != nil {
 		return C.handle_and_error_t{err_msg: C.CString(err.Error())}
 	}
+	mode := "read"
+	if !opts.ReadOnly {
+		mode = "read-write"
+	}
+	pebble.DefaultLogger.Infof("opened database in %s mode at \"%s\"", mode, inputPath)
 	return C.handle_and_error_t{handle: C.uintptr_t(NewCGoHandle(db).Handle)}
 }
 
@@ -164,11 +181,14 @@ func PebbleMerge(
 }
 
 //export PebbleNewIter
-func PebbleNewIter(dbPtr C.uintptr_t, iterOptionsPtr C.uintptr_t) C.uintptr_t {
+func PebbleNewIter(dbPtr C.uintptr_t, iterOptionsPtr C.uintptr_t) C.handle_and_error_t {
 	db := CGoHandle(dbPtr).Value().(*pebble.DB)
 	iterOptions := CGoHandle(iterOptionsPtr).Value().(*pebble.IterOptions)
-	iter := db.NewIter(iterOptions)
-	return C.uintptr_t(NewCGoHandle(iter).Handle)
+	iter, err := db.NewIter(iterOptions)
+	if err != nil {
+		return C.handle_and_error_t{err_msg: C.CString(err.Error())}
+	}
+	return C.handle_and_error_t{handle: C.uintptr_t(NewCGoHandle(iter).Handle)}
 }
 
 //export PebbleNumFiles

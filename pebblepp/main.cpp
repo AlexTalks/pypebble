@@ -7,7 +7,7 @@ int main() {
   const std::string dbName = "tmp";
   std::cout << "Pebble Test: Starting" << std::endl;
   try {
-    cockroachdb::pebble::DB* db = cockroachdb::pebble::DB::Open(dbName);
+    cockroachdb::pebble::DB* db = cockroachdb::pebble::DB::Open(dbName, true);
     std::cout << "Opened " << dbName << std::endl;
 
     db->Set("hello", "world", true);

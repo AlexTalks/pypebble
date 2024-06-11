@@ -119,12 +119,22 @@ void DB::Merge(const std::string& key, const std::string& val, bool sync) {
 
 Iterator* DB::NewIter() {
   checkValid();
-  return new Iterator(PebbleNewIter(handle_, IterOptions().handle_));
+  handle_and_error_t result = PebbleNewIter(handle_, IterOptions().handle_);
+  if (result.err_msg) {
+    throw std::runtime_error(result.err_msg);
+  }
+
+  return new Iterator(result.handle);
 }
 
 Iterator* DB::NewIter(IterOptions& opts) {
   checkValid();
-  return new Iterator(PebbleNewIter(handle_, opts.handle_));
+  handle_and_error_t result = PebbleNewIter(handle_, opts.handle_);
+  if (result.err_msg) {
+    throw std::runtime_error(result.err_msg);
+  }
+
+  return new Iterator(result.handle);
 }
 
 }  // namespace cockroachdb::pebble
