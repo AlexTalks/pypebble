@@ -1,8 +1,6 @@
-module github.com/alextalks/pypebble
+module github.com/alextalks/pypebble/pebble_bindings
 
 go 1.22.0
-
-toolchain go1.22.3
 
 // REQUIRED: Pebble version should match the version found in the imported
 // cockroach go.mod.
