@@ -7,6 +7,16 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(Python 3.7 REQUIRED COMPONENTS Interpreter Development)
 find_package(pybind11 CONFIG)
 
+# Optional build flags
+option(CGO_DYLD_ENABLED "Enable CGo Dynamic Linking" OFF)
+option(COCKROACH "Enable CockroachDB-specific functionality" OFF)
+
+if(COCKROACH)
+    message(STATUS "CockroachDB support enabled")
+    add_compile_definitions("COCKROACH_SUPPORT=1")
+endif()
+
+# Submodules
 add_subdirectory(pebble_bindings)
 
 # Without this, any build libraries automatically have names "lib{x}.so"

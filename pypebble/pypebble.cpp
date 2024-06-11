@@ -30,6 +30,7 @@ PYBIND11_MODULE(pypebble, m) {
   // -- Module-level Functions and Utilities --
   m.def("cgo_handles", &CGoHandles,
         "Number of live handles to Go-managed memory available to C/Python.");
+#ifdef COCKROACH_SUPPORT
   m.def("pretty_key", &PrettyPrintKey, "Pretty-print a CockroachDB key.");
   m.def(
       "scan_key",
@@ -37,6 +38,7 @@ PYBIND11_MODULE(pypebble, m) {
         return py::bytes(PrettyScanKey(human_key));
       },
       "Scan a human-readable CockroachDB key.");
+#endif
 
   py::class_<Object>(m, "_Object").def_property_readonly("go_type", &Object::GoType);
 
@@ -49,14 +51,9 @@ PYBIND11_MODULE(pypebble, m) {
         "Default Pebble Options.\n"
         DOC_READ_ONLY,
         py::arg("read_write") = false);
-  m.def("cockroach_options", &CockroachDefaultOptions,
-        "Default options for CockroachDB Pebble instances.\n"
-        DOC_READ_ONLY,
-        py::arg("read_write") = false);
   m.def("pebble_options", &PebbleOptions,
         "Customizable Pebble Options.",
         py::arg("write"),
-        py::arg("use_cockroach_interfaces"),
         py::arg("l0_compaction_threshold"),
         py::arg("l0_stop_writes_threshold"),
         py::arg("lbase_max_bytes"),
@@ -66,6 +63,24 @@ PYBIND11_MODULE(pypebble, m) {
         py::arg("mem_table_stop_writes_threshold"),
         py::arg("block_size"),
         py::arg("index_block_size"));
+#ifdef COCKROACH_SUPPORT
+  m.def("cockroach_options", &CockroachDefaultOptions,
+        "Default options for CockroachDB Pebble instances.\n"
+        DOC_READ_ONLY,
+        py::arg("read_write") = false);
+  m.def("cockroach_custom_options", &CockroachCustomOptions,
+        "Customizable Pebble Options using CockroachDB interfaces.",
+        py::arg("write"),
+        py::arg("l0_compaction_threshold"),
+        py::arg("l0_stop_writes_threshold"),
+        py::arg("lbase_max_bytes"),
+        py::arg("levels"),
+        py::arg("max_concurrent_compactions"),
+        py::arg("mem_table_size"),
+        py::arg("mem_table_stop_writes_threshold"),
+        py::arg("block_size"),
+        py::arg("index_block_size"));
+#endif
 
   // -- pebble.Iterator and utils --
   py::enum_<IterKeyType>(m, "IterKeyType")
@@ -230,13 +245,6 @@ PYBIND11_MODULE(pypebble, m) {
           "Returns the list of range keys (suffix, key value) covering the "
           "current iterator position.\n"
           "The range bounds may be retrieved separately through Iterator.range_bounds().")
-      // TODO(sarkesian): Potentially remove, leaving conversion to separate functions,
-      // Python decorators, or Python-level settings.
-      .def(
-          "pretty_key",
-          &Iterator::PrettyKey,
-          "The key at the current iterator position, "
-          "interpreted as a CockroachDB key and pretty-printed.")
       .def(
           "valid",
           &Iterator::Valid,

@@ -1,8 +1,12 @@
+//go:build cockroach_support
+// +build cockroach_support
+
 package main
 
 import (
 	"time"
 
+	cockroachStorage "github.com/cockroachdb/cockroach/pkg/storage"
 	"github.com/cockroachdb/pebble"
 	"github.com/cockroachdb/pebble/bloom"
 	"github.com/cockroachdb/pebble/vfs"
@@ -13,16 +17,16 @@ import (
 */
 import "C"
 
-//export PebbleBasicOptions
-func PebbleBasicOptions(readWrite bool) C.uintptr_t {
-	opts := &pebble.Options{
-		ReadOnly: !readWrite,
-	}
+//export PebbleCockroachDefaultOptions
+func PebbleCockroachDefaultOptions(readWrite bool) C.uintptr_t {
+	opts := cockroachStorage.DefaultPebbleOptions()
+	opts.ReadOnly = !readWrite
+	opts.Experimental.KeyValidationFunc = nil
 	return C.uintptr_t(NewCGoHandle(opts).Handle)
 }
 
-//export PebbleOptions
-func PebbleOptions(
+//export PebbleCockroachCustomOptions
+func PebbleCockroachCustomOptions(
 	readWrite bool,
 	l0CompactionThreshold int,
 	l0StopWritesThreshold int,
@@ -34,8 +38,8 @@ func PebbleOptions(
 	blockSize int,
 	indexBlockSize int,
 ) C.uintptr_t {
-	comparer := pebble.DefaultComparer
-	merger := pebble.DefaultMerger
+	comparer := cockroachStorage.EngineComparer
+	merger := cockroachStorage.MVCCMerger
 	opts := &pebble.Options{
 		ReadOnly:              !readWrite,
 		Comparer:              comparer,
@@ -51,8 +55,9 @@ func PebbleOptions(
 		MemTableStopWritesThreshold: memTableStopWritesThreshold,
 		Merger:                      merger,
 		// NB: Could be made configurable.
-		FlushDelayDeleteRange: 10 * time.Second,
-		FlushDelayRangeKey:    10 * time.Second,
+		FlushDelayDeleteRange:   10 * time.Second,
+		FlushDelayRangeKey:      10 * time.Second,
+		BlockPropertyCollectors: cockroachStorage.PebbleBlockPropertyCollectors,
 		// NB: Experimental options are not currently supported.
 	}
 	for i := 0; i < len(opts.Levels); i++ {

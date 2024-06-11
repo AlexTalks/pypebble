@@ -6,6 +6,7 @@ namespace cockroachdb::pebble {
 
 int CGoHandles() { return LiveCGoHandles(); }
 
+#ifdef COCKROACH_SUPPORT
 std::string PrettyPrintKey(const std::string& key) {
   return ::PrettyPrintKey((char*)key.data(), key.length());
 }
@@ -19,6 +20,7 @@ std::string PrettyScanKey(const std::string& human_key) {
   free(result.bytes.val);
   return key;
 }
+#endif
 
 DB::DB(uintptr_t new_handle) : CGoHandle(new_handle), closed_(false) {}
 DB::~DB() {}

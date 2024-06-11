@@ -1,3 +1,6 @@
+//go:build cockroach_support
+// +build cockroach_support
+
 package main
 
 import (

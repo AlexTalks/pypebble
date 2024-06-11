@@ -16,6 +16,12 @@ $ make pebble_bindings
 ..
 $ make pebtest.out
 ```
+### Build Flags
+Can be enabled or disabled with `-D<FLAG_NAME>=[ON|OFF]`. Defaults:
+```
+COCKROACH:BOOL=OFF          // Enable CockroachDB-specific functionality
+CGO_DYLD_ENABLED:BOOL=OFF   // Enable CGo Dynamic Linking
+```
 
 ## Python Usage
 Make sure `pypebble.so` shared module is on the `PATH`.
