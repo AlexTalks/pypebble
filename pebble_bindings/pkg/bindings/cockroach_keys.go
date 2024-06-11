@@ -1,3 +1,6 @@
+//go:build cockroach_support
+// +build cockroach_support
+
 package main
 
 import (
@@ -8,7 +11,7 @@ import (
 )
 
 /*
-#include "libpebble-common.h"
+#include "cgo-common.h"
 */
 import "C"
 

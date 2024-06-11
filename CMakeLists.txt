@@ -7,58 +7,41 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(Python 3.7 REQUIRED COMPONENTS Interpreter Development)
 find_package(pybind11 CONFIG)
 
+# Optional build flags
+option(CGO_DYLD_ENABLED "Enable CGo Dynamic Linking" OFF)
+option(COCKROACH "Enable CockroachDB-specific functionality" OFF)
+
+if(COCKROACH)
+    message(STATUS "CockroachDB support enabled")
+    add_compile_definitions("COCKROACH_SUPPORT=1")
+endif()
+
+# Submodules
+add_subdirectory(pebble_bindings)
 
 # Without this, any build libraries automatically have names "lib{x}.so"
 set(CMAKE_SHARED_MODULE_PREFIX "")
 
-# Generate the CGo bindings
-file(GLOB GO_BINDING_SRCS ${CMAKE_SOURCE_DIR}/pkg/bindings/*.go)
-add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/libpebble.so ${CMAKE_BINARY_DIR}/libpebble.h
-    COMMAND CGO_CPPFLAGS="-I${CMAKE_SOURCE_DIR}" go build -buildmode=c-shared -o libpebble.so ${CMAKE_SOURCE_DIR}/pkg/bindings
-    # Also copy generated header to source dir so it can be under version control.
-    COMMAND cp ${CMAKE_BINARY_DIR}/libpebble.h ${CMAKE_SOURCE_DIR}/libpebble.h
-    DEPENDS ${CMAKE_SOURCE_DIR}/libpebble-common.h ${GO_BINDING_SRCS}
-    COMMENT "Generating CGo bindings."
-)
-add_custom_target(gen_libpebble DEPENDS libpebble.h)
+# pebblepp library
+file(GLOB pebblepp_srcs ${CMAKE_CURRENT_SOURCE_DIR}/pebblepp/*.cpp)
+add_library(pebblepp STATIC ${pebblepp_srcs})
+target_link_libraries(pebblepp binding_lib)
+target_include_directories(pebblepp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Add a shared module - modules are intended to be imported at runtime.
-# - This is where you add the source files
-add_library(pypebble MODULE
-        pebblepp/common.cpp
-        pebblepp/iterator.cpp
-        pebblepp/options.cpp
-        pebblepp/pebble.cpp
-        pebblepp/pypebble.cpp)
-add_dependencies(pypebble gen_libpebble)
+# pebtest.out executable
+# TODO: Refactor this into a real test using gtest
+add_executable(pebtest.out
+        ${CMAKE_CURRENT_SOURCE_DIR}/pebblepp/tests/pebtest.cpp)
+target_link_libraries(pebtest.out pebblepp)
+target_include_directories(pebtest.out PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Set up the libraries and header search paths for this target
+# pypebble shared module - modules are intended to be imported at runtime.
+file(GLOB pypebble_srcs ${CMAKE_CURRENT_SOURCE_DIR}/pypebble/*.cpp)
+add_library(pypebble MODULE ${pypebble_srcs})
 target_link_libraries(pypebble
-        ${CMAKE_BINARY_DIR}/libpebble.so
+        pebblepp
         pybind11::module
         ${Python_LIBRARIES})
 target_include_directories(pypebble PRIVATE
-        ${CMAKE_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}
         ${Python_INCLUDE_DIRS})
-
-# pebtest.out
-add_executable(pebtest.out
-        pebblepp/common.cpp
-        pebblepp/iterator.cpp
-        pebblepp/options.cpp
-        pebblepp/pebble.cpp
-        pebblepp/main.cpp)
-add_dependencies(pebtest.out gen_libpebble)
-target_link_libraries(pebtest.out ${CMAKE_BINARY_DIR}/libpebble.so)
-target_include_directories(pebtest.out PRIVATE ${CMAKE_SOURCE_DIR})
-
-# Copy shared objects as necessary for debugging/IDEs.
-add_custom_command(
-        OUTPUT ${CMAKE_SOURCE_DIR}/libpebble.so ${CMAKE_SOURCE_DIR}/pypebble.so
-        COMMAND cp ${CMAKE_BINARY_DIR}/libpebble.so ${CMAKE_SOURCE_DIR}/libpebble.so
-        COMMAND cp ${CMAKE_BINARY_DIR}/pypebble.so ${CMAKE_SOURCE_DIR}/pypebble.so
-        DEPENDS gen_libpebble pypebble
-        COMMENT "Copying shared objects."
-)
-add_custom_target(copy_shared_objs DEPENDS libpebble.so pypebble.so)

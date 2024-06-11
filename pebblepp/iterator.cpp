@@ -151,13 +151,6 @@ std::vector<RangeKeyData> Iterator::RangeKeys() {
     return range_keys;
 }
 
-std::string Iterator::PrettyKey() {
-  bytes_t ret = PebbleIterKey(handle_);
-  std::string pretty_key(::PrettyPrintKey(ret.val, ret.len));
-  free(ret.val);
-  return pretty_key;
-}
-
 bool Iterator::Valid() { return PebbleIterValid(handle_); }
 
 std::optional<std::runtime_error> Iterator::Error() {

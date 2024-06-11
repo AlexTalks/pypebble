@@ -7,7 +7,7 @@ import (
 )
 
 /*
-#include "libpebble-common.h"
+#include "cgo-common.h"
 #include <stdlib.h>	// for malloc
 
 typedef enum {

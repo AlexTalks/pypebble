@@ -82,9 +82,6 @@ class Iterator : public CGoHandle {
 
   std::vector<RangeKeyData> RangeKeys();
 
-  // TODO(sarkesian): Potentially remove, leaving conversion to separate functions.
-  std::string PrettyKey();
-
   bool Valid();
   std::optional<std::runtime_error> Error();
   void Close();

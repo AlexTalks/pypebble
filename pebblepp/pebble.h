@@ -11,8 +11,10 @@ namespace cockroachdb::pebble {
 
 int CGoHandles();
 
+#ifdef COCKROACH_SUPPORT
 std::string PrettyPrintKey(const std::string& key);
 std::string PrettyScanKey(const std::string& human_key);
+#endif
 
 class DB : public CGoHandle {
  public:

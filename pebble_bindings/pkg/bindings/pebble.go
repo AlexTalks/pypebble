@@ -9,7 +9,7 @@ import (
 )
 
 /*
-#include "libpebble-common.h"
+#include "cgo-common.h"
 */
 import "C"
 

@@ -1,5 +1,5 @@
-#ifndef LIBPEBBLE_COMMON_H
-#define LIBPEBBLE_COMMON_H
+#ifndef CGO_COMMON_H
+#define CGO_COMMON_H
 
 #include <stdint.h> // for uintptr_t
 #include <stdbool.h>
