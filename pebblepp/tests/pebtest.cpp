@@ -1,7 +1,7 @@
 #include <format>
 #include <iostream>
 
-#include "pebble.h"
+#include "pebblepp/pebble.h"
 
 int main() {
   const std::string dbName = "tmp";

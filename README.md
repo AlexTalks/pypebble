@@ -4,7 +4,7 @@ A work-in-progress Python wrapper for CockroachDB's [Pebble](https://github.com/
 storage engine, using a cgo and C++/pybind11-based interface.
 
 ## Building
-Requires: cmake (>=3.5), Python (>=3.7), Pybind11, Go >=1.19, a C++ compiler.
+Requires: cmake (>=3.5), Python (>=3.7), Pybind11, Go >=1.22, a C++ compiler.
 ```shell
 $ mkdir build && cd build
 $ cmake ..
@@ -12,20 +12,13 @@ $ make pypebble
 ```
 Or, for just C++ bindings and sample program:
 ```shell
-$ make gen_libpebble
+$ make pebble_bindings
 ..
 $ make pebtest.out
 ```
 
-Manual build notes (deprecated):
-```shell
-$ go build -buildmode=c-shared -o libpebble.so ./pkg/bindings
-..
-$ clang++ -Wall --std=c++17 -o pebtest.out -fPIC pebblepp/*.cpp -I. -L. -lpebble
-```
-
 ## Python Usage
-Make sure `[libpebble|pypebble].so` files are on the PATH.
+Make sure `pypebble.so` shared module is on the `PATH`.
 
 You may need to set `DYLD_LIBRARY_PATH=/path/to/libpebble.so` as well.
 ```python
